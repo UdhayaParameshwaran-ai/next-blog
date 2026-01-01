@@ -6,7 +6,6 @@ import { db } from "..";
 import { usersTable } from "@/db/schema";
 import {
   createCookieSession,
-  createLocalSession,
   decrypt,
   deleteCookieSession,
 } from "@/lib/session";
@@ -18,11 +17,6 @@ import { getUserById } from "./user";
 export async function signup(state: FormState, formData: FormData) {
   const validateFields = SignupSchema.safeParse({
     name: formData.get("name"),
-    email: formData.get("email"),
-    password: formData.get("password"),
-  });
-
-  console.log("Form data:", {
     email: formData.get("email"),
     password: formData.get("password"),
   });
@@ -62,14 +56,6 @@ export async function signup(state: FormState, formData: FormData) {
       message: "An error occurred while creating your account.",
     };
   }
-
-  // if (formData.get("session") === "localStorage") {
-  //   const token = await createLocalSession(user.id);
-  //   console.log(token);
-  //   return {
-  //     token: token,
-  //   };
-  // }
   await createCookieSession(user.id);
   redirect("/");
 }

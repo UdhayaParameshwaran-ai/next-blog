@@ -1,3 +1,4 @@
+import { pgEnum } from "drizzle-orm/pg-core";
 import { z } from "zod";
 
 export const SignupSchema = z.object({
@@ -30,6 +31,13 @@ export const SigninSchema = z.object({
     .trim(),
 });
 
+export const PostSchema = z.object({
+  title: z.string().min(3, { message: "Title should atleast 3 chars" }).trim(),
+  description: z
+    .string()
+    .min(20, { message: "Description should atleast 20 chars" }),
+});
+
 export type FormState =
   | {
       errors?: {
@@ -37,6 +45,19 @@ export type FormState =
         email?: string[];
         password?: string[];
       };
+      message?: string;
+    }
+  | undefined;
+
+export type PostFormState =
+  | {
+      error?: {
+        title?: string[];
+        description?: string[];
+      };
+      message?: string;
+    }
+  | {
       message?: string;
     }
   | undefined;
@@ -51,4 +72,15 @@ export type User = {
   name: string;
   email: string;
   password: string;
+};
+
+export type Post = {
+  id: number;
+  title: string;
+  description: string;
+  author: number | null;
+  upvotes: number | null;
+  status: "submitted" | "approved" | "rejected";
+  updated_at: string | null;
+  published_at: string | null;
 };

@@ -1,9 +1,6 @@
 "use client";
 import { useUser } from "@/context/AuthContext";
-import Image from "next/image";
-import { useContext } from "react";
 import Logout from "./_components/Logout";
-import { useRouter } from "next/navigation";
 
 export default function Home() {
   let { user } = useUser();

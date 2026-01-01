@@ -1,5 +1,17 @@
 import { sql } from "drizzle-orm";
-import { integer, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
+import {
+  integer,
+  pgEnum,
+  pgTable,
+  timestamp,
+  varchar,
+} from "drizzle-orm/pg-core";
+
+export const postStatusEnum = pgEnum("post_status", [
+  "submitted",
+  "approved",
+  "rejected",
+]);
 
 export const usersTable = pgTable("users", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -14,7 +26,7 @@ export const postTable = pgTable("posts", {
   description: varchar().notNull(),
   author: integer().references(() => usersTable.id),
   upvotes: integer().default(0),
-  published_at: timestamp("published_at", { mode: "string" })
-    .notNull()
-    .default(sql`now()`),
+  status: postStatusEnum("status").notNull().default("submitted"),
+  updated_at: timestamp("updated_at", { mode: "string" }).default(sql`now()`),
+  published_at: timestamp("published_at", { mode: "string" }),
 });
