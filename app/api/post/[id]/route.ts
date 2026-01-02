@@ -9,9 +9,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const user = await getCurrentUser();
-
   const id = (await params).id;
-
   const data = await db
     .select()
     .from(postTable)

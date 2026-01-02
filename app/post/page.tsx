@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import CreatePostForm from "../_components/CreatePost";
 import { Post } from "@/lib/definitions";
-import { useUser } from "@/context/AuthContext";
 import PostCard from "../_components/PostCard";
 
 export default function Page() {
