@@ -78,9 +78,16 @@ export type Post = {
   id: number;
   title: string;
   description: string;
-  author: number | null;
-  upvotes: number | null;
+  author: number;
+  upvotes: number ;
   status: "submitted" | "approved" | "rejected";
   updated_at: string | null;
   published_at: string | null;
 };
+
+export type Comments={
+  id:number,
+  //post:number,
+  comment:string,
+  author:string
+}

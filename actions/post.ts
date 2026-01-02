@@ -4,8 +4,6 @@ import { getCurrentUser } from "./auth";
 import { postTable } from "@/db/schema";
 import { db } from "..";
 import { eq, sql } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
-import { success } from "zod";
 
 export async function createPost(state: PostFormState, formData: FormData) {
   const user = await getCurrentUser();
@@ -102,4 +100,14 @@ export async function deletePost(postId: number | undefined) {
 export async function getAllPosts() {
   const posts = await db.select().from(postTable);
   return posts;
+}
+
+export async function getApprovedPosts(){
+  const posts =await db.select().from(postTable).where(eq(postTable.status,"approved"));
+  return posts;
+}
+
+export async function getPostbyId(postId:number){
+  const post=await db.select().from(postTable).where(eq(postTable.id,postId))
+  return post;
 }

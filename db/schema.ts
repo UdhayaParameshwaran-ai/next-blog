@@ -30,3 +30,10 @@ export const postTable = pgTable("posts", {
   updated_at: timestamp("updated_at", { mode: "string" }).default(sql`now()`),
   published_at: timestamp("published_at", { mode: "string" }),
 });
+
+export const commentsTable=pgTable("comments",{
+  id:integer().primaryKey().generatedAlwaysAsIdentity(),
+  comment:varchar().notNull(),
+  author:integer().references(()=>usersTable.id),
+  post:integer().references(()=>postTable.id),
+})
