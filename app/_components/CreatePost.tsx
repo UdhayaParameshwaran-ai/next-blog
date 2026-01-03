@@ -1,7 +1,6 @@
 "use client";
 
 import { createPost } from "@/actions/post";
-import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
 
 interface Props {
@@ -10,6 +9,7 @@ interface Props {
 
 export default function CreatePostForm({ onSuccess }: Props) {
   const [state, action, pending] = useActionState(createPost, undefined);
+
   useEffect(() => {
     if (state?.success) {
       onSuccess();
@@ -19,7 +19,6 @@ export default function CreatePostForm({ onSuccess }: Props) {
   return (
     <form action={action} className="space-y-4 max-w-md">
       <h2 className="text-xl font-semibold">Create Post</h2>
-
       <input
         name="title"
         placeholder="Post title"

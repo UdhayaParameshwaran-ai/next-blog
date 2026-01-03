@@ -9,7 +9,7 @@ export default function Page() {
   const [open, setOpen] = useState(false);
   const [post, setPost] = useState<Post[]>([]);
   const [isLoading, setLoading] = useState(true);
-  
+
   const fetchPosts = async () => {
     const res = await fetch("/api/post/");
     const data = await res.json();
@@ -29,7 +29,6 @@ export default function Page() {
     <div className="px-10 py-5">
       <div className="flex justify-between items-center">
         <h1 className="text-xl font-bold">Posts</h1>
-
         <button
           onClick={() => setOpen(true)}
           className="px-4 py-2 bg-black text-white rounded-2xl"

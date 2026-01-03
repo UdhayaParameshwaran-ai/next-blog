@@ -1,3 +1,4 @@
+import { useUser } from "@/context/AuthContext";
 import Link from "next/link";
 
 type PostStatus = "submitted" | "approved" | "rejected";
@@ -10,6 +11,9 @@ interface PostCardProps {
 }
 
 const PostCard = ({ id, title, description, status }: PostCardProps) => {
+  const { user } = useUser();
+  const isUser = user?.id != 5; //checking user is not admin
+
   const statusStyles = {
     submitted: "bg-blue-100 text-blue-700 border-blue-200",
     approved: "bg-green-100 text-green-700 border-green-200",
@@ -21,11 +25,13 @@ const PostCard = ({ id, title, description, status }: PostCardProps) => {
         <h2 className="text-xl font-bold text-gray-900 line-clamp-1">
           {title}
         </h2>
-        <span
-          className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusStyles[status]}`}
-        >
-          {status.charAt(0).toUpperCase() + status.slice(1)}
-        </span>
+        {isUser && (
+          <span
+            className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusStyles[status]}`}
+          >
+            {status.charAt(0).toUpperCase() + status.slice(1)}
+          </span>
+        )}
       </div>
 
       <p className="text-gray-600 text-sm line-clamp-3 mb-4">{description}</p>

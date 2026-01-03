@@ -1,6 +1,7 @@
 "use client";
 
 import { updatePost, deletePost } from "@/actions/post";
+import { useUser } from "@/context/AuthContext";
 import { Post } from "@/lib/definitions";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
@@ -9,7 +10,8 @@ export default function Page() {
   const { id } = useParams();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-
+  const { user } = useUser();
+  const isUser = user?.id != 5;
   const [post, setPost] = useState<Post>();
   const [isLoading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -72,9 +74,11 @@ export default function Page() {
       ) : (
         <div className="prose">
           <p className="text-lg text-gray-700">{post.description}</p>
-          <span className="inline-block mt-4 px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">
-            Status: {post.status}
-          </span>
+          {isUser && (
+            <span className="inline-block mt-4 px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">
+              Status: {post.status}
+            </span>
+          )}
         </div>
       )}
     </div>

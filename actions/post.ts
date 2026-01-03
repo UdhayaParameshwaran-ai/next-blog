@@ -17,15 +17,15 @@ export async function createPost(state: PostFormState, formData: FormData) {
       error: validateFields.error.flatten().fieldErrors,
     };
   }
-
   const { title, description } = validateFields.data;
+
   const data = await db
     .insert(postTable)
     .values({
       title: title,
       description: description,
       author: user.id,
-      status: "submitted",
+      status: user.id === 5 ? "approved" : "submitted",
       upvotes: 0,
     })
     .returning();
@@ -52,6 +52,7 @@ export async function getUserPosts() {
 }
 
 export async function updatePost(postId: number, formData: FormData) {
+  const user = await getCurrentUser();
   const validateFields = PostSchema.safeParse({
     title: formData.get("title"),
     description: formData.get("description"),
@@ -69,7 +70,7 @@ export async function updatePost(postId: number, formData: FormData) {
     .set({
       title: title,
       description: description,
-      status: "submitted",
+      status: user.id === 5 ? "approved" : "submitted",
       updated_at: sql`NOW()`,
     })
     .where(eq(postTable.id, postId))
@@ -102,13 +103,19 @@ export async function getAllPosts() {
   return posts;
 }
 
-export async function getApprovedPosts(){
-  const posts =await db.select().from(postTable).where(eq(postTable.status,"approved"));
+export async function getApprovedPosts() {
+  const posts = await db
+    .select()
+    .from(postTable)
+    .where(eq(postTable.status, "approved"));
   return posts;
 }
 
-export async function getPostbyId(postId:number){
-  const post=await db.select().from(postTable).where(eq(postTable.id,postId))
+export async function getPostbyId(postId: number) {
+  const post = await db
+    .select()
+    .from(postTable)
+    .where(eq(postTable.id, postId));
   return post;
 }
 
