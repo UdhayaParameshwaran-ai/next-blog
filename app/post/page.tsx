@@ -9,6 +9,7 @@ export default function Page() {
   const [open, setOpen] = useState(false);
   const [post, setPost] = useState<Post[]>([]);
   const [isLoading, setLoading] = useState(true);
+  
   const fetchPosts = async () => {
     const res = await fetch("/api/post/");
     const data = await res.json();

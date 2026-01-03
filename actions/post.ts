@@ -111,3 +111,37 @@ export async function getPostbyId(postId:number){
   const post=await db.select().from(postTable).where(eq(postTable.id,postId))
   return post;
 }
+
+export async function likePostbyId(postId: number) {
+  try {
+    const updatedPost = await db
+      .update(postTable)
+      .set({
+        upvotes: sql`${postTable.upvotes} + 1`,
+      })
+      .where(eq(postTable.id, postId))
+      .returning();
+
+    return { success: true, data: updatedPost[0] };
+  } catch (error) {
+    console.error("Failed to like post:", error);
+    return { success: false };
+  }
+}
+
+export async function unlikePostbyId(postId: number) {
+  try {
+    const updatedPost = await db
+      .update(postTable)
+      .set({
+        upvotes: sql`${postTable.upvotes} - 1`,
+      })
+      .where(eq(postTable.id, postId))
+      .returning();
+
+    return { success: true, data: updatedPost[0] };
+  } catch (error) {
+    console.error("Failed to like post:", error);
+    return { success: false };
+  }
+}

@@ -7,7 +7,7 @@ type CommentBoxProps = {
 
 export default function CommentBox({ authorName, comment }: CommentBoxProps) {
   return (
-    <div className="border-b border-gray-800 text-gray-800">
+    <div className="border-b border-gray-400 text-gray-800">
       <div className="flex flex-cols space-x-1 ">
         <UserRound width={15} />
         <div className="mb-2">

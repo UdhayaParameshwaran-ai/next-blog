@@ -3,7 +3,6 @@
 import { commentsTable, usersTable } from "@/db/schema";
 import { db } from "..";
 import { eq } from "drizzle-orm";
-
 export async function getCommentsbyPostId(postId:number){
     console.log("postId",postId)
 
@@ -19,12 +18,17 @@ export async function getCommentsbyPostId(postId:number){
     return data;
 }
 
-export async function addComment(extraData: { post: number; author: number }, formData: FormData) {
+export async function addComment(extraData: { post: number; author: number },prevState: any,formData: FormData) {
     const commentText = formData.get("comment") as string;
     
-    await db.insert(commentsTable).values({
+    const comment=await db.insert(commentsTable).values({
         comment: commentText,
         post: extraData.post,
         author: extraData.author
-    });
+    }).returning();
+    if(comment){
+        return{
+            success:true
+        }
+    }
 }

@@ -1,4 +1,3 @@
-import { pgEnum } from "drizzle-orm/pg-core";
 import { z } from "zod";
 
 export const SignupSchema = z.object({
@@ -78,8 +77,8 @@ export type Post = {
   id: number;
   title: string;
   description: string;
-  author: number;
-  upvotes: number ;
+  author: number |null;
+  upvotes: number |null ;
   status: "submitted" | "approved" | "rejected";
   updated_at: string | null;
   published_at: string | null;
@@ -91,3 +90,15 @@ export type Comments={
   comment:string,
   author:string
 }
+
+export type CommentFormState =
+  | {
+      error?: {
+        comment?: string[];
+      };
+      message?: string;
+    }
+  | {
+      message?: string;
+    }
+  | undefined;

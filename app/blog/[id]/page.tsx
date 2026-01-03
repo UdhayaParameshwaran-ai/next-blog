@@ -1,13 +1,13 @@
 "use client";
 import { addComment, getCommentsbyPostId } from "@/actions/comment";
-import { getPostbyId } from "@/actions/post";
+import { getPostbyId, likePostbyId, unlikePostbyId } from "@/actions/post";
 import { getUserById } from "@/actions/user";
 import CommentBox from "@/app/_components/CommentBox";
 import { useUser } from "@/context/AuthContext";
 import { Comments, Post } from "@/lib/definitions";
-import { PencilLine } from "lucide-react";
+import { PencilLine, ThumbsUp } from "lucide-react";
 import { useParams } from "next/navigation";
-import { use, useEffect, useState } from "react";
+import { use, useActionState, useEffect, useState } from "react";
 
 export default function Page() {
   const { id } = useParams();
@@ -15,14 +15,28 @@ export default function Page() {
   const [isLoading, setLoading] = useState(false);
   const [author, setAuthor] = useState<string>();
   const [comments, setComments] = useState<Comments[]>([]);
+  const [isLiked, setIsLiked] = useState(false);
 
   const { user } = useUser();
-
+  const initialState = { message: null, success: false };
   const addCommentWithIds = addComment.bind(null, {
     post: Number(id),
     //@ts-ignore
     author: user?.id,
   });
+  const [state, formAction] = useActionState(addCommentWithIds, initialState);
+
+  const handleLike=async ()=>{
+    if(isLiked){
+      const res=await unlikePostbyId(Number(id))
+      setPost(res.data as Post)
+      setIsLiked(prev => !prev)
+    }else{
+      const res=await likePostbyId(Number(id))
+      setPost(res.data as Post)
+      setIsLiked(prev => !prev)
+    }
+  }
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -50,18 +64,16 @@ export default function Page() {
     fetchAuthorName();
   }, [post?.author]);
 
-  useEffect(()=>{
-    const fetchComments=async()=>{
-      if(!post?.id) return;
-      const res =await getCommentsbyPostId(post.id);
-      setComments(res)
-    }
-   fetchComments();
-  },[post?.id])
+  useEffect(() => {
+    const fetchComments = async () => {
+      const res = await getCommentsbyPostId(Number(id));
+      setComments(res);
+    };
+    fetchComments();
+  }, [post?.id, state?.success]);
 
   if (isLoading) return <p className="p-10 text-center">Loading...</p>;
   if (!post) return <p className="p-10 text-center">Post not found</p>;
-  console.log("Comments: ",comments)
   return (
     <div className="max-w-3/4 mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center border-b pb-4">
@@ -72,11 +84,29 @@ export default function Page() {
         </div>
       </div>
       <div className="prose">
-        <p className="text-lg text-gray-700">{post.description}</p>
+        <p className="text-lg text-gray-900">{post.description}</p>
+      </div>
+      <div className="flex space-x-2">
+        <button
+          onClick={handleLike}
+          className="group flex items-center gap-2 transition-all active:scale-90"
+        >
+          <ThumbsUp
+            width={17}
+            className={`transition-all duration-300 ${
+              isLiked
+                ? "fill-blue-500 text-blue-500 scale-110"
+                : "fill-none text-gray-500 hover:text-gray-700"
+            }`}
+          />
+          <span className={isLiked ? "text-blue-500" : "text-gray-500"}>
+           {post.upvotes} Like(s)
+          </span>
+        </button> 
       </div>
       <div className="space-y-2 w-full">
-        <div className="text-2xl w-full">Comments</div>
-        <form action={addCommentWithIds} className="flex space-x-3 w-full">
+        <div className="text-2xl w-full text-gray-800">Comments</div>
+        <form action={formAction} className="flex space-x-3 w-full">
           <input
             type="text"
             className="border p-2 px-4 flex-1 rounded-3xl "
