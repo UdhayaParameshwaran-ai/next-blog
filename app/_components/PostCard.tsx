@@ -1,7 +1,7 @@
 import { useUser } from "@/context/AuthContext";
 import Link from "next/link";
 
-type PostStatus = "submitted" | "approved" | "rejected";
+type PostStatus = "submitted" | "approved" | "rejected" | "blocked";
 
 interface PostCardProps {
   id: number;
@@ -18,6 +18,7 @@ const PostCard = ({ id, title, description, status }: PostCardProps) => {
     submitted: "bg-blue-100 text-blue-700 border-blue-200",
     approved: "bg-green-100 text-green-700 border-green-200",
     rejected: "bg-red-100 text-red-700 border-red-200",
+    blocked: "bg-gray-100 text-gray-700 border-gray-200",
   };
   return (
     <div className="max-w-md p-6 bg-white border rounded-2xl shadow-sm hover:shadow-md transition-shadow">

@@ -77,19 +77,19 @@ export type Post = {
   id: number;
   title: string;
   description: string;
-  author: number |null;
-  upvotes: number |null ;
-  status: "submitted" | "approved" | "rejected";
+  author: number | null;
+  upvotes: number | null;
+  status: "submitted" | "approved" | "rejected" | "blocked";
   updated_at: string | null;
   published_at: string | null;
 };
 
-export type Comments={
-  id:number,
+export type Comments = {
+  id: number;
   //post:number,
-  comment:string,
-  author:string
-}
+  comment: string;
+  author: string;
+};
 
 export type CommentFormState =
   | {

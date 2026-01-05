@@ -53,9 +53,9 @@ export default function Page() {
           <div className="bg-white rounded-lg p-6 w-[400px] relative">
             <button
               onClick={() => setOpen(false)}
-              className="border bg-black/40 text-white p-2 rounded-lg absolute right-5 top-3 cursor-pointer"
+              className="absolute top-4 right-4 bg-gray-100 rounded-full p-2 hover:bg-gray-200  cursor-pointer"
             >
-              X
+              ✕
             </button>
             <CreatePostForm
               onSuccess={() => {

@@ -39,8 +39,6 @@ export default function Page() {
 
   if (isLoading) return <p className="p-10 text-center">Loading...</p>;
   if (!post) return <p className="p-10 text-center">Post not found</p>;
-  console.log(post);
-  console.log(post.title);
 
   return (
     <div className="max-w-3/4 mx-auto p-6 space-y-6">
@@ -113,7 +111,7 @@ function UpdateForm({
         type="submit"
         className="bg-black text-white px-4 py-2 rounded-2xl"
       >
-        Save Changes
+        Request Update
       </button>
     </form>
   );

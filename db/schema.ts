@@ -11,6 +11,7 @@ export const postStatusEnum = pgEnum("post_status", [
   "submitted",
   "approved",
   "rejected",
+  "blocked",
 ]);
 
 export const usersTable = pgTable("users", {
@@ -31,9 +32,17 @@ export const postTable = pgTable("posts", {
   published_at: timestamp("published_at", { mode: "string" }),
 });
 
-export const commentsTable=pgTable("comments",{
-  id:integer().primaryKey().generatedAlwaysAsIdentity(),
-  comment:varchar().notNull(),
-  author:integer().references(()=>usersTable.id),
-  post:integer().references(()=>postTable.id),
-})
+export const commentsTable = pgTable("comments", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  comment: varchar().notNull(),
+  author: integer().references(() => usersTable.id),
+  post: integer().references(() => postTable.id),
+});
+
+export const updatedPostTable = pgTable("updatedPosts", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  postId: integer().references(() => postTable.id),
+  updatedTitle: varchar().notNull(),
+  updatedDescripton: varchar().notNull(),
+  updated_at: timestamp("updated_at", { mode: "string" }).default(sql`now()`),
+});

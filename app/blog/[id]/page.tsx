@@ -26,51 +26,44 @@ export default function Page() {
   });
   const [state, formAction] = useActionState(addCommentWithIds, initialState);
 
-  const handleLike=async ()=>{
-    if(isLiked){
-      const res=await unlikePostbyId(Number(id))
-      setPost(res.data as Post)
-      setIsLiked(prev => !prev)
-    }else{
-      const res=await likePostbyId(Number(id))
-      setPost(res.data as Post)
-      setIsLiked(prev => !prev)
+  const handleLike = async () => {
+    if (isLiked) {
+      const res = await unlikePostbyId(Number(id));
+      setPost(res.data as Post);
+      setIsLiked((prev) => !prev);
+    } else {
+      const res = await likePostbyId(Number(id));
+      setPost(res.data as Post);
+      setIsLiked((prev) => !prev);
     }
-  }
-
+  };
   useEffect(() => {
-    const fetchPost = async () => {
+    const fetchAllData = async () => {
+      if (!id) return;
+
       setLoading(true);
       try {
-        console.log("PostId: ", id);
-        const res = await getPostbyId(Number(id));
-        const data = res[0];
-        setPost(data as Post);
+        // Fetching the post first
+        const postRes = await getPostbyId(Number(id));
+        const postData = postRes[0];
+        setPost(postData);
+
+        // Fetching Authorname and Comments in parallel
+        const [authorRes, commentsRes] = await Promise.all([
+          postData?.author ? getUserById(postData.author) : null,
+          getCommentsbyPostId(Number(id)),
+        ]);
+
+        if (authorRes) setAuthor(authorRes.name);
+        setComments(commentsRes);
       } catch (err) {
-        console.error(err);
+        console.error("Error loading page data:", err);
       } finally {
         setLoading(false);
       }
     };
-    if (id) fetchPost();
-  }, [id]);
-  useEffect(() => {
-    const fetchAuthorName = async () => {
-      if (!post?.author) return;
-      const res = await getUserById(post.author);
-      setAuthor(res.name);
-    };
-
-    fetchAuthorName();
-  }, [post?.author]);
-
-  useEffect(() => {
-    const fetchComments = async () => {
-      const res = await getCommentsbyPostId(Number(id));
-      setComments(res);
-    };
-    fetchComments();
-  }, [post?.id, state?.success]);
+    fetchAllData();
+  }, [id, state?.success]);
 
   if (isLoading) return <p className="p-10 text-center">Loading...</p>;
   if (!post) return <p className="p-10 text-center">Post not found</p>;
@@ -100,9 +93,9 @@ export default function Page() {
             }`}
           />
           <span className={isLiked ? "text-blue-500" : "text-gray-500"}>
-           {post.upvotes} Like(s)
+            {post.upvotes} Like(s)
           </span>
-        </button> 
+        </button>
       </div>
       <div className="space-y-2 w-full">
         <div className="text-2xl w-full text-gray-800">Comments</div>
