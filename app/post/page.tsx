@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import CreatePostForm from "../_components/CreatePost";
 import { Post } from "@/lib/definitions";
 import PostCard from "../_components/PostCard";
+import { Button } from "@/components/ui/button";
+import { PostCardShimmer } from "../_components/PostCardShimmer";
 
 export default function Page() {
   const [open, setOpen] = useState(false);
@@ -21,21 +23,26 @@ export default function Page() {
     fetchPosts();
   }, []);
 
-  if (isLoading) return <p>Loading...</p>;
-  if (!post) return <p>No profile data</p>;
-  console.log(post);
-
+  if (isLoading)
+    return (
+      <div className="grid space-x-2 grid-cols-4">
+        <PostCardShimmer />
+        <PostCardShimmer />
+        <PostCardShimmer />
+        <PostCardShimmer />
+      </div>
+    );
   return (
     <div className="px-10 py-5">
       <div className="flex justify-between items-center">
         <h1 className="text-xl font-bold">Posts</h1>
-        <button
-          onClick={() => setOpen(true)}
-          className="px-4 py-2 bg-black text-white rounded-2xl"
-        >
-          Add Post
-        </button>
+        <Button onClick={() => setOpen(true)}>Add post</Button>
       </div>
+      {post.length == 0 && (
+        <p className="text-gray-900 font-medium mt-10">
+          No Posts Yet. Create a post!
+        </p>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch mt-5">
         {post.map((p) => (
           <div key={p.id}>

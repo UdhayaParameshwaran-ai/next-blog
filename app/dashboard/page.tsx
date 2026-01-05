@@ -4,6 +4,7 @@ import AdminPostCard from "../_components/AdminPostCard";
 import { useEffect, useState } from "react";
 import { Post } from "@/lib/definitions";
 import Link from "next/link";
+import { PostCardShimmer } from "../_components/PostCardShimmer";
 
 interface UpdatedPost {
   id: number;
@@ -46,11 +47,18 @@ export default function page() {
     };
     fetchData();
   }, []);
-  if (isLoading) return <p>Loading posts...</p>;
+  if (isLoading)
+    return (
+      <div className="grid space-x-2 grid-cols-4">
+        <PostCardShimmer />
+        <PostCardShimmer />
+        <PostCardShimmer />
+        <PostCardShimmer />
+      </div>
+    );
 
   return (
-    <div>
-      <div>Dashboard</div>
+    <div className="px-10">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch mt-5">
         {posts.map((post) => (
           <div key={post.id}>

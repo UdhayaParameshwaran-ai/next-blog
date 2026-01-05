@@ -3,6 +3,7 @@ import { addComment, getCommentsbyPostId } from "@/actions/comment";
 import { getPostbyId, likePostbyId, unlikePostbyId } from "@/actions/post";
 import { getUserById } from "@/actions/user";
 import CommentBox from "@/app/_components/CommentBox";
+import { PostShimmer } from "@/app/_components/PostShimmer";
 import { useUser } from "@/context/AuthContext";
 import { Comments, Post } from "@/lib/definitions";
 import { PencilLine, ThumbsUp } from "lucide-react";
@@ -65,7 +66,12 @@ export default function Page() {
     fetchAllData();
   }, [id, state?.success]);
 
-  if (isLoading) return <p className="p-10 text-center">Loading...</p>;
+  if (isLoading)
+    return (
+      <div className="flex items-center justify-center">
+        <PostShimmer />
+      </div>
+    );
   if (!post) return <p className="p-10 text-center">Post not found</p>;
   return (
     <div className="max-w-3/4 mx-auto p-6 space-y-6">

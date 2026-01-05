@@ -1,5 +1,6 @@
 "use client";
 
+import { PostShimmer } from "@/app/_components/PostShimmer";
 import { Post } from "@/lib/definitions";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
@@ -82,7 +83,12 @@ export default function Page() {
     fetchPost();
   }, [id]);
 
-  if (isLoading) return <p className="p-10 text-center">Loading...</p>;
+  if (isLoading)
+    return (
+      <div className="flex items-center justify-center">
+        <PostShimmer />
+      </div>
+    );
   if (!post) return <p className="p-10 text-center">User Post not found</p>;
 
   return (

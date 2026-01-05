@@ -1,6 +1,7 @@
 "use client";
 
 import { updatePost, deletePost } from "@/actions/post";
+import { PostShimmer } from "@/app/_components/PostShimmer";
 import { useUser } from "@/context/AuthContext";
 import { Post } from "@/lib/definitions";
 import { useParams, useRouter } from "next/navigation";
@@ -37,7 +38,12 @@ export default function Page() {
     }
   };
 
-  if (isLoading) return <p className="p-10 text-center">Loading...</p>;
+  if (isLoading)
+    return (
+      <div className="flex items-center justify-center">
+        <PostShimmer />
+      </div>
+    );
   if (!post) return <p className="p-10 text-center">Post not found</p>;
 
   return (
