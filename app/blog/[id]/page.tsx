@@ -21,6 +21,7 @@ export default function Page() {
   const [isLoading, setLoading] = useState(false);
   const [comments, setComments] = useState<Comments[]>([]);
   const [isLiked, setIsLiked] = useState(false);
+  const [isHandling, setIsHandling] = useState(false);
 
   const { user } = useUser();
   const initialState = { message: null, success: false };
@@ -33,6 +34,7 @@ export default function Page() {
   const [state, formAction] = useActionState(addCommentWithIds, initialState);
 
   const handleLike = async () => {
+    setIsHandling(true);
     if (isLiked) {
       const res = await unlikePostbyId(Number(id));
       setPost(res.data as PostWithAuthor);
@@ -42,6 +44,7 @@ export default function Page() {
       setPost(res.data as PostWithAuthor);
       setIsLiked((prev) => !prev);
     }
+    setIsHandling(false);
   };
 
   useEffect(() => {
@@ -90,6 +93,7 @@ export default function Page() {
       <div className="flex space-x-2">
         <button
           onClick={handleLike}
+          disabled={isHandling}
           className="group flex items-center gap-2 transition-all active:scale-90"
         >
           <ThumbsUp

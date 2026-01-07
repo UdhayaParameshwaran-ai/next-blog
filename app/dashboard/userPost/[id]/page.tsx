@@ -1,15 +1,20 @@
 "use client";
 
+import { deletePost } from "@/actions/post";
 import { PostShimmer } from "@/app/_components/PostShimmer";
 import { Button } from "@/components/ui/button";
 import { Post } from "@/lib/definitions";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function Page() {
   const { id } = useParams();
   const [post, setPost] = useState<Post>();
   const [isLoading, setLoading] = useState(true);
+  const [isHandling, setIsHandling] = useState(false);
+  const router = useRouter();
+
   const fetchPost = async () => {
     const res = await fetch(`/api/userPost/${id}`);
     if (!res.ok) return setLoading(false);
@@ -19,6 +24,7 @@ export default function Page() {
   };
   const handleBlock = async () => {
     try {
+      setIsHandling(true);
       const response = await fetch(`/api/userPost/${post?.id}`, {
         method: "POST",
         headers: {
@@ -33,13 +39,17 @@ export default function Page() {
 
       const result = await response.json();
       setPost(result[0]);
+      toast.success("Post Blocked");
     } catch (error) {
       console.error("Failed to approve post:", error);
+    } finally {
+      setIsHandling(false);
     }
   };
 
   const handleApprove = async () => {
     try {
+      setIsHandling(true);
       const response = await fetch(`/api/userPost/${post?.id}`, {
         method: "POST",
         headers: {
@@ -54,12 +64,16 @@ export default function Page() {
 
       const result = await response.json();
       setPost(result[0]);
+      toast.success("Post Approved");
     } catch (error) {
       console.error("Failed to approve post:", error);
+    } finally {
+      setIsHandling(false);
     }
   };
   const handleReject = async () => {
     try {
+      setIsHandling(true);
       const response = await fetch(`/api/userPost/${post?.id}`, {
         method: "POST",
         headers: {
@@ -75,9 +89,22 @@ export default function Page() {
       const result = await response.json();
       console.log("Success:", result);
       setPost(result[0]);
+      toast.success("Post Rejected");
     } catch (error) {
       console.error("Failed to approve post:", error);
+    } finally {
+      setIsHandling(false);
     }
+  };
+
+  const handleDelete = async () => {
+    setIsHandling(true);
+    const response = await deletePost(Number(id));
+    if (response.message) {
+      toast.success("Post Deleted");
+      router.push("/dashboard");
+    }
+    setIsHandling(false);
   };
 
   useEffect(() => {
@@ -101,21 +128,46 @@ export default function Page() {
         </span>
 
         <div className="space-x-2">
+          {post.status != "submitted" && (
+            <Button
+              disabled={isHandling}
+              onClick={handleDelete}
+              variant="destructive"
+            >
+              Delete
+            </Button>
+          )}
           {post.status == "submitted" ? (
             <div>
-              <Button onClick={handleApprove} variant="outline">
+              <Button
+                disabled={isHandling}
+                onClick={handleApprove}
+                variant="outline"
+              >
                 Approve
               </Button>{" "}
-              <Button onClick={handleReject} variant="destructive">
+              <Button
+                disabled={isHandling}
+                onClick={handleReject}
+                variant="destructive"
+              >
                 Reject
               </Button>
             </div>
           ) : post.status == "approved" ? (
-            <Button onClick={handleBlock} variant="secondary">
+            <Button
+              disabled={isHandling}
+              onClick={handleBlock}
+              variant="secondary"
+            >
               Block
             </Button>
           ) : (
-            <Button onClick={handleApprove} variant="outline">
+            <Button
+              disabled={isHandling}
+              onClick={handleApprove}
+              variant="outline"
+            >
               Approve
             </Button>
           )}

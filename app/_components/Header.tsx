@@ -13,7 +13,7 @@ export default function Header() {
   };
 
   return (
-    <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
+    <header className="flex sticky top-0 z-50 items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
       <Link href="/">
         <h1 className="text-xl font-bold text-gray-800 tracking-tight">
           Blog Application

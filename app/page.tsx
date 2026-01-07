@@ -75,7 +75,7 @@ export default function Home() {
           <PaginationItem>
             <PaginationPrevious
               className={
-                isLoading || currentPage == 1
+                currentPage == 1
                   ? "pointer-events-none opacity-50"
                   : "cursor-pointer"
               }
@@ -95,7 +95,7 @@ export default function Home() {
           <PaginationItem>
             <PaginationNext
               className={
-                isLoading || currentPage >= totalPages
+                currentPage >= totalPages
                   ? "pointer-events-none opacity-50"
                   : "cursor-pointer"
               }

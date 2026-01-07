@@ -36,32 +36,37 @@ export default function page() {
   const [selectedPost, setSelectedPost] = useState<UpdatedPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [isHandling, setIsHandling] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const [allPostsData, updatedPostsData] = await Promise.all([
+        getAllPosts(),
+        getUpdatedPosts(),
+      ]);
+      if (Array.isArray(allPostsData) && Array.isArray(updatedPostsData)) {
+        setPosts(allPostsData);
+        setUpdatedPosts(updatedPostsData);
+      }
+    } catch (error) {
+      console.error("Failed to fetch posts:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleApproveUpdate = async () => {
+    setIsHandling(true);
     if (selectedPost?.postId == null) return;
     const update = await approveUpdate(selectedPost?.postId);
     if (update) toast.success("Approved the updated post.");
     setSelectedPost(null);
+    setIsHandling(false);
+    await fetchData();
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const [allPostsData, updatedPostsData] = await Promise.all([
-          getAllPosts(),
-          getUpdatedPosts(),
-        ]);
-        if (Array.isArray(allPostsData) && Array.isArray(updatedPostsData)) {
-          setPosts(allPostsData);
-          setUpdatedPosts(updatedPostsData);
-        }
-      } catch (error) {
-        console.error("Failed to fetch posts:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchData();
   }, []);
 
@@ -86,7 +91,7 @@ export default function page() {
     );
 
   return (
-    <div className="px-10">
+    <div className="px-10 ">
       <Select value={statusFilter} onValueChange={setStatusFilter}>
         <SelectTrigger className="w-[180px] m-5">
           <SelectValue placeholder="Select a filter" />
@@ -137,12 +142,12 @@ export default function page() {
         ))}
       </div>
       {selectedPost && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden">
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setSelectedPost(null)}
           />
-          <div className="relative bg-white max-w-lg w-full rounded-2xl shadow-2xl overflow-hidden">
+          <div className="relative bg-white max-w-lg w-full rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
             <button
               onClick={() => setSelectedPost(null)}
               className="absolute top-4 right-4 bg-gray-100 rounded-full p-2 hover:bg-gray-200"
@@ -150,7 +155,7 @@ export default function page() {
               ✕
             </button>
 
-            <div className="p-6">
+            <div className="p-6 overflow-y-auto">
               <h2 className="text-2xl font-bold mb-2">
                 {selectedPost.updatedTitle}
               </h2>
@@ -166,6 +171,7 @@ export default function page() {
                   Compare Old post
                 </Link>
                 <button
+                  disabled={isHandling}
                   onClick={handleApproveUpdate}
                   className="px-3 py-2 mb-1 bg-black text-white rounded-3xl font-semibold cursor-pointer"
                 >

@@ -96,16 +96,22 @@ function UpdateForm({
   post: Post;
   onComplete: () => void;
 }) {
+  const [isHandling, setIsHandling] = useState(false);
+
   async function handleSubmit(formData: FormData) {
+    setIsHandling(true);
     const updatingPost = await updatePost(post.id, formData);
-    if (updatingPost.success) toast.success("Requested for Updating.");
+    if (updatingPost.success) toast.success("Requested for Update.");
     onComplete();
+    setIsHandling(false);
   }
   return (
     <form action={handleSubmit} className="space-y-4 bg-gray-50 p-4 rounded">
       <Input name="title" defaultValue={post.title} />
       <Textarea name="description" defaultValue={post.description} rows={4} />
-      <Button type="submit">Request Update</Button>
+      <Button disabled={isHandling} type="submit">
+        Request Update
+      </Button>
     </form>
   );
 }
