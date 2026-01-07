@@ -3,7 +3,6 @@
 import { useActionState, startTransition } from "react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { signup } from "@/actions/auth";
 
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,6 @@ import {
 import { Input } from "@/components/ui/input";
 
 export default function Signup() {
-  const router = useRouter();
   const [state, action, pending] = useActionState(signup, undefined);
 
   const form = useForm({
@@ -140,11 +138,7 @@ export default function Signup() {
               >
                 Already have an Account? Sign in
               </Link>
-              <Button
-                type="submit"
-                disabled={pending}
-                className="w-1/2 bg-black text-white rounded-3xl hover:bg-white hover:text-black border border-black transition-colors"
-              >
+              <Button type="submit" disabled={pending}>
                 {pending ? "Signing Up..." : "Sign Up"}
               </Button>
             </div>

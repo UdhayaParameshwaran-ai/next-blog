@@ -6,13 +6,16 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params:Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-    const user=await getCurrentUser();
-    if(user.id!=5){
-        return NextResponse.json({ error: "Not a Authenticated person" }, { status: 401 })
-    }
-  const postId =(await params).id;
+  const user = await getCurrentUser();
+  if (user?.id != 5) {
+    return NextResponse.json(
+      { error: "Not a Authenticated person" },
+      { status: 401 }
+    );
+  }
+  const postId = (await params).id;
   const data = await db
     .select()
     .from(postTable)
@@ -25,28 +28,33 @@ export async function GET(
   return NextResponse.json(post);
 }
 
-export async function POST(request:Request,{params}:{params:Promise<{id:string}>}){
-    const user=await getCurrentUser();
-    if(user.id!=5){
-        return NextResponse.json({ error: "Not a Authenticated person" }, { status: 401 })
-    }
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const user = await getCurrentUser();
+  if (user?.id != 5) {
+    return NextResponse.json(
+      { error: "Not a Authenticated person" },
+      { status: 401 }
+    );
+  }
 
-    const postId=(await params).id
-    const body=await request.json()
-    console.log(body)
-    const {status}=body
-    console.log(status)
-    
-   const data = await db
-  .update(postTable)
-  .set({
-    status: status,
-    published_at: sql`CASE WHEN ${postTable.published_at} IS NULL THEN NOW() ELSE ${postTable.published_at} END`,
-    updated_at: sql`CASE WHEN ${postTable.published_at} IS NOT NULL THEN NOW() ELSE ${postTable.updated_at} END`,
-  })
-  //@ts-ignore
-  .where(eq(postTable.id, postId))
-  .returning();
-    return NextResponse.json(data,{status:200})
+  const postId = (await params).id;
+  const body = await request.json();
+  console.log(body);
+  const { status } = body;
+  console.log(status);
 
+  const data = await db
+    .update(postTable)
+    .set({
+      status: status,
+      published_at: sql`CASE WHEN ${postTable.published_at} IS NULL THEN NOW() ELSE ${postTable.published_at} END`,
+      updated_at: sql`CASE WHEN ${postTable.published_at} IS NOT NULL THEN NOW() ELSE ${postTable.updated_at} END`,
+    })
+    //@ts-ignore
+    .where(eq(postTable.id, postId))
+    .returning();
+  return NextResponse.json(data, { status: 200 });
 }

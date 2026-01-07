@@ -1,6 +1,9 @@
 "use client";
 
 import { createPost } from "@/actions/post";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useActionState, useEffect } from "react";
 
 interface Props {
@@ -19,21 +22,12 @@ export default function CreatePostForm({ onSuccess }: Props) {
   return (
     <form action={action} className="space-y-4 max-w-md">
       <h2 className="text-xl font-semibold">Create Post</h2>
-      <input
-        name="title"
-        placeholder="Post title"
-        className="w-full border px-3 py-2 rounded"
-      />
+      <Input name="title" placeholder="Post title" />
       {state?.error?.title && (
         <p className="text-sm text-red-500">{state?.error?.title}</p>
       )}
 
-      <textarea
-        name="description"
-        placeholder="Post content"
-        rows={4}
-        className="w-full border px-3 py-2 rounded"
-      />
+      <Textarea name="description" placeholder="Post content" />
 
       {state?.error?.description && (
         <p className="text-sm text-red-500">{state?.error?.description}</p>
@@ -43,12 +37,9 @@ export default function CreatePostForm({ onSuccess }: Props) {
         <p className="text-sm text-green-600">Post created successfully</p>
       )}
 
-      <button
-        disabled={pending}
-        className="bg-black text-white px-4 py-2 rounded disabled:opacity-50"
-      >
+      <Button disabled={pending}>
         {pending ? "Creating..." : "Create Post"}
-      </button>
+      </Button>
     </form>
   );
 }

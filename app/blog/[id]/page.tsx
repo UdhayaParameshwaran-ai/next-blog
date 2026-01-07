@@ -1,20 +1,24 @@
 "use client";
 import { addComment, getCommentsbyPostId } from "@/actions/comment";
 import { getPostbyId, likePostbyId, unlikePostbyId } from "@/actions/post";
-import { getUserById } from "@/actions/user";
 import CommentBox from "@/app/_components/CommentBox";
 import { PostShimmer } from "@/app/_components/PostShimmer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useUser } from "@/context/AuthContext";
 import { Comments, Post } from "@/lib/definitions";
 import { PencilLine, ThumbsUp } from "lucide-react";
 import { useParams } from "next/navigation";
-import { use, useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
+
+interface PostWithAuthor extends Post {
+  authorName: string;
+}
 
 export default function Page() {
   const { id } = useParams();
-  const [post, setPost] = useState<Post>();
+  const [post, setPost] = useState<PostWithAuthor>();
   const [isLoading, setLoading] = useState(false);
-  const [author, setAuthor] = useState<string>();
   const [comments, setComments] = useState<Comments[]>([]);
   const [isLiked, setIsLiked] = useState(false);
 
@@ -25,46 +29,44 @@ export default function Page() {
     //@ts-ignore
     author: user?.id,
   });
+
   const [state, formAction] = useActionState(addCommentWithIds, initialState);
 
   const handleLike = async () => {
     if (isLiked) {
       const res = await unlikePostbyId(Number(id));
-      setPost(res.data as Post);
+      setPost(res.data as PostWithAuthor);
       setIsLiked((prev) => !prev);
     } else {
       const res = await likePostbyId(Number(id));
-      setPost(res.data as Post);
+      setPost(res.data as PostWithAuthor);
       setIsLiked((prev) => !prev);
     }
   };
+
   useEffect(() => {
     const fetchAllData = async () => {
       if (!id) return;
-
       setLoading(true);
       try {
-        // Fetching the post first
-        const postRes = await getPostbyId(Number(id));
-        const postData = postRes[0];
-        setPost(postData);
-
-        // Fetching Authorname and Comments in parallel
-        const [authorRes, commentsRes] = await Promise.all([
-          postData?.author ? getUserById(postData.author) : null,
+        const [postRes, commentsRes] = await Promise.all([
+          getPostbyId(Number(id)),
           getCommentsbyPostId(Number(id)),
         ]);
+        setPost(postRes?.data);
 
-        if (authorRes) setAuthor(authorRes.name);
-        setComments(commentsRes);
+        if (Array.isArray(commentsRes)) {
+          setComments(commentsRes);
+        }
       } catch (err) {
-        console.error("Error loading page data:", err);
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
+
     fetchAllData();
-  }, [id, state?.success]);
+  }, [id]);
 
   if (isLoading)
     return (
@@ -79,7 +81,7 @@ export default function Page() {
         <h1 className="text-3xl font-bold">{post.title}</h1>
         <div className="flex space-x-2">
           <PencilLine width={18} />
-          <span>Author Name: {author}</span>
+          <span>Author Name: {post.authorName}</span>
         </div>
       </div>
       <div className="prose">
@@ -103,21 +105,16 @@ export default function Page() {
           </span>
         </button>
       </div>
-      <div className="space-y-2 w-full">
-        <div className="text-2xl w-full text-gray-800">Comments</div>
+      <div className="space-y-2 w-[60%]">
+        <div className="text-xl w-full text-gray-800">Comments</div>
         <form action={formAction} className="flex space-x-3 w-full">
-          <input
+          <Input
             type="text"
-            className="border p-2 px-4 flex-1 rounded-3xl "
             name="comment"
+            placeholder="Add a comment"
             required
           />
-          <button
-            type="submit"
-            className="bg-black text-white cursor-pointer p-2 rounded-3xl"
-          >
-            Post Comment
-          </button>
+          <Button type="submit">Add</Button>
         </form>
 
         {comments.length == 0 ? (

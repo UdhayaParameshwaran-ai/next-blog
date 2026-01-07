@@ -10,7 +10,7 @@ export default async function Proxy(request: NextRequest) {
   if (!cookieSession?.userId) {
     return NextResponse.redirect(new URL("/signin", request.nextUrl));
   }
-  //checking if user requesting protectd route
+  //checking if user requesting protected route
   const path = request.nextUrl.pathname;
   const isProtectedRoute = protectedRoutes.includes(path);
   if (isProtectedRoute && cookieSession?.userId != 5) {

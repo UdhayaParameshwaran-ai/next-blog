@@ -1,10 +1,17 @@
 "use client";
 import { approveUpdate, getAllPosts, getUpdatedPosts } from "@/actions/post";
-import AdminPostCard from "../_components/AdminPostCard";
 import { useEffect, useState } from "react";
 import { Post } from "@/lib/definitions";
 import Link from "next/link";
 import { PostCardShimmer } from "../_components/PostCardShimmer";
+import { toast } from "sonner";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 interface UpdatedPost {
   id: number;
@@ -23,9 +30,7 @@ export default function page() {
   const handleApproveUpdate = async () => {
     if (selectedPost?.postId == null) return;
     const update = await approveUpdate(selectedPost?.postId);
-    if (update.length != 0) {
-      console.log("Admin approve Updated successful");
-    }
+    if (update) toast.success("Approved the updated post.");
     setSelectedPost(null);
   };
 
@@ -37,8 +42,10 @@ export default function page() {
           getAllPosts(),
           getUpdatedPosts(),
         ]);
-        setPosts(allPostsData);
-        setUpdatedPosts(updatedPostsData);
+        if (Array.isArray(allPostsData) && Array.isArray(updatedPostsData)) {
+          setPosts(allPostsData);
+          setUpdatedPosts(updatedPostsData);
+        }
       } catch (error) {
         console.error("Failed to fetch posts:", error);
       } finally {
@@ -61,41 +68,37 @@ export default function page() {
     <div className="px-10">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch mt-5">
         {posts.map((post) => (
-          <div key={post.id}>
-            <AdminPostCard
-              id={post.id}
-              title={post.title}
-              description={post.description}
-              status={post.status}
-            />
-          </div>
+          <Card key={post.id}>
+            <CardHeader postStatus={post.status}>
+              <CardTitle>{post.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>{post.description}</p>
+            </CardContent>
+            <CardFooter
+              href={`dashboard/userPost/${post.id}`}
+              likes={post.upvotes}
+            ></CardFooter>
+          </Card>
         ))}
-        {/* 1. Grid of Updated Post Cards */}
+        {/*Grid of Updated Post Cards*/}
         {updatedPosts.map((post) => (
-          <div
-            key={post.id}
-            className="max-w-md p-6 bg-white border rounded-2xl shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div className="flex justify-between items-start mb-4">
-              <h2 className="text-xl font-bold text-gray-900 line-clamp-1">
-                {post.updatedTitle}
-              </h2>
-              <span
-                className={`px-2.5 py-0.5 rounded-full text-xs font-medium border bg-yellow-200 text-yellow-700 border-yellow-700`}
+          <Card key={post.id}>
+            <CardHeader postStatus="updated">
+              <CardTitle>{post.updatedTitle}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>{post.updatedDescripton}</p>
+            </CardContent>
+            <CardFooter>
+              <button
+                onClick={() => setSelectedPost(post)}
+                className="text-blue-600 hover:text-blue-800 text-sm font-semibold cursor-pointer"
               >
-                Updated
-              </span>
-            </div>
-            <p className="text-gray-600 text-sm line-clamp-1 mb-4">
-              {post.updatedDescripton}
-            </p>
-            <button
-              onClick={() => setSelectedPost(post)}
-              className="text-blue-600 hover:text-blue-800 text-sm font-semibold cursor-pointer"
-            >
-              View Details →
-            </button>
-          </div>
+                View Details →
+              </button>
+            </CardFooter>
+          </Card>
         ))}
       </div>
       {selectedPost && (
@@ -131,7 +134,7 @@ export default function page() {
                   onClick={handleApproveUpdate}
                   className="px-3 py-2 mb-1 bg-black text-white rounded-3xl font-semibold cursor-pointer"
                 >
-                  Update post
+                  Update the post
                 </button>
               </div>
             </div>

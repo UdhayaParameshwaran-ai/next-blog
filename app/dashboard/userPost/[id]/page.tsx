@@ -1,6 +1,7 @@
 "use client";
 
 import { PostShimmer } from "@/app/_components/PostShimmer";
+import { Button } from "@/components/ui/button";
 import { Post } from "@/lib/definitions";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
@@ -102,33 +103,21 @@ export default function Page() {
         <div className="space-x-2">
           {post.status == "submitted" ? (
             <div>
-              <button
-                onClick={handleApprove}
-                className="px-4 py-2 border rounded-2xl hover:bg-gray-100 cursor-pointer"
-              >
+              <Button onClick={handleApprove} variant="outline">
                 Approve
-              </button>{" "}
-              <button
-                onClick={handleReject}
-                className="px-4 py-2 bg-red-600 text-white rounded-2xl hover:bg-red-700 disabled:opacity-50 cursor-pointer"
-              >
+              </Button>{" "}
+              <Button onClick={handleReject} variant="destructive">
                 Reject
-              </button>
+              </Button>
             </div>
           ) : post.status == "approved" ? (
-            <button
-              onClick={handleBlock}
-              className="px-4 py-2 bg-red-600 text-white rounded-2xl hover:bg-red-700 disabled:opacity-50 cursor-pointer"
-            >
+            <Button onClick={handleBlock} variant="secondary">
               Block
-            </button>
+            </Button>
           ) : (
-            <button
-              onClick={handleApprove}
-              className="px-4 py-2 border rounded-2xl hover:bg-gray-100 cursor-pointer"
-            >
+            <Button onClick={handleApprove} variant="outline">
               Approve
-            </button>
+            </Button>
           )}
         </div>
       </div>

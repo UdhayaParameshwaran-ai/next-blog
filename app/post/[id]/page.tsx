@@ -1,11 +1,15 @@
 "use client";
 
-import { updatePost, deletePost } from "@/actions/post";
+import { updatePost, deletePost, getUSerPostById } from "@/actions/post";
 import { PostShimmer } from "@/app/_components/PostShimmer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useUser } from "@/context/AuthContext";
 import { Post } from "@/lib/definitions";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
+import { toast } from "sonner";
 
 export default function Page() {
   const { id } = useParams();
@@ -18,10 +22,9 @@ export default function Page() {
   const [isEditing, setIsEditing] = useState(false);
 
   const fetchPost = async () => {
-    const res = await fetch(`/api/post/${id}`);
-    if (!res.ok) return setLoading(false);
-    const data = await res.json();
-    setPost(data);
+    const res = await getUSerPostById(Number(id));
+    if (!res.data) return;
+    setPost(res?.data);
     setLoading(false);
   };
 
@@ -51,19 +54,16 @@ export default function Page() {
       <div className="flex justify-between items-center border-b pb-4">
         <h1 className="text-3xl font-bold">{post.title}</h1>
         <div className="space-x-2">
-          <button
-            onClick={() => setIsEditing(!isEditing)}
-            className="px-4 py-2 border rounded-2xl hover:bg-gray-100 cursor-pointer"
-          >
+          <Button onClick={() => setIsEditing(!isEditing)} variant="outline">
             {isEditing ? "Cancel" : "Edit"}
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleDelete}
             disabled={isPending}
-            className="px-4 py-2 bg-red-600 text-white rounded-2xl hover:bg-red-700 disabled:opacity-50 cursor-pointer"
+            variant="destructive"
           >
             {isPending ? "Deleting..." : "Delete"}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -97,28 +97,15 @@ function UpdateForm({
   onComplete: () => void;
 }) {
   async function handleSubmit(formData: FormData) {
-    await updatePost(post.id, formData);
+    const updatingPost = await updatePost(post.id, formData);
+    if (updatingPost.success) toast.success("Requested for Updating.");
     onComplete();
   }
   return (
     <form action={handleSubmit} className="space-y-4 bg-gray-50 p-4 rounded">
-      <input
-        name="title"
-        defaultValue={post.title}
-        className="w-full border p-2 rounded"
-      />
-      <textarea
-        name="description"
-        defaultValue={post.description}
-        className="w-full border p-2 rounded"
-        rows={4}
-      />
-      <button
-        type="submit"
-        className="bg-black text-white px-4 py-2 rounded-2xl"
-      >
-        Request Update
-      </button>
+      <Input name="title" defaultValue={post.title} />
+      <Textarea name="description" defaultValue={post.description} rows={4} />
+      <Button type="submit">Request Update</Button>
     </form>
   );
 }

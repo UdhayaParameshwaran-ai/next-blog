@@ -114,11 +114,7 @@ export default function Signin() {
                 </p>
               )}
 
-              <Button
-                type="submit"
-                disabled={pending}
-                className="w-1/2 bg-black text-white rounded-3xl hover:bg-white hover:text-black border border-black transition-colors"
-              >
+              <Button type="submit" disabled={pending}>
                 {pending ? "Signing In..." : "Sign In"}
               </Button>
             </div>
