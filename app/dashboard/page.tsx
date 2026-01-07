@@ -12,6 +12,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface UpdatedPost {
   id: number;
@@ -26,6 +35,7 @@ export default function page() {
   const [updatedPosts, setUpdatedPosts] = useState<UpdatedPost[]>([]);
   const [selectedPost, setSelectedPost] = useState<UpdatedPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const handleApproveUpdate = async () => {
     if (selectedPost?.postId == null) return;
@@ -54,6 +64,17 @@ export default function page() {
     };
     fetchData();
   }, []);
+
+  const filteredPosts = posts.filter((post) => {
+    if (statusFilter === "all") return true;
+    if (statusFilter === "updated") return false;
+    return post.status === statusFilter;
+  });
+  const filteredUpdates = updatedPosts.filter((post) => {
+    if (statusFilter === "all" || statusFilter === "updated") return true;
+    return false;
+  });
+
   if (isLoading)
     return (
       <div className="grid space-x-2 grid-cols-4">
@@ -66,8 +87,23 @@ export default function page() {
 
   return (
     <div className="px-10">
+      <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <SelectTrigger className="w-[180px] m-5">
+          <SelectValue placeholder="Select a filter" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectLabel>Filters</SelectLabel>
+            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="approved">Approved</SelectItem>
+            <SelectItem value="rejected">Rejected</SelectItem>
+            <SelectItem value="blocked">Blocked</SelectItem>
+            <SelectItem value="updated">Updated</SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch mt-5">
-        {posts.map((post) => (
+        {filteredPosts.map((post) => (
           <Card key={post.id}>
             <CardHeader postStatus={post.status}>
               <CardTitle>{post.title}</CardTitle>
@@ -81,8 +117,7 @@ export default function page() {
             ></CardFooter>
           </Card>
         ))}
-        {/*Grid of Updated Post Cards*/}
-        {updatedPosts.map((post) => (
+        {filteredUpdates.map((post) => (
           <Card key={post.id}>
             <CardHeader postStatus="updated">
               <CardTitle>{post.updatedTitle}</CardTitle>
