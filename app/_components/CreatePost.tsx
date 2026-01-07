@@ -20,26 +20,39 @@ export default function CreatePostForm({ onSuccess }: Props) {
   }, [state?.success, onSuccess]);
 
   return (
-    <form action={action} className="space-y-4 max-w-md">
-      <h2 className="text-xl font-semibold">Create Post</h2>
-      <Input name="title" placeholder="Post title" />
-      {state?.error?.title && (
-        <p className="text-sm text-red-500">{state?.error?.title}</p>
-      )}
+    <form action={action} className="flex flex-col max-w-md max-h-[80vh]">
+      <div className="p-4">
+        <h2 className="text-xl font-semibold">Create Post</h2>
+      </div>
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+        <div>
+          <Input name="title" placeholder="Post title" />
+          {state?.error?.title && (
+            <p className="text-sm text-red-500 mt-1">{state?.error?.title}</p>
+          )}
+        </div>
 
-      <Textarea name="description" placeholder="Post content" />
-
-      {state?.error?.description && (
-        <p className="text-sm text-red-500">{state?.error?.description}</p>
-      )}
-
-      {state?.success && (
-        <p className="text-sm text-green-600">Post created successfully</p>
-      )}
-
-      <Button disabled={pending}>
-        {pending ? "Creating..." : "Create Post"}
-      </Button>
+        <div>
+          <Textarea
+            name="description"
+            placeholder="Post content"
+            className="min-h-[200px]"
+          />
+          {state?.error?.description && (
+            <p className="text-sm text-red-500 mt-1">
+              {state?.error?.description}
+            </p>
+          )}
+        </div>
+        {state?.success && (
+          <p className="text-sm text-green-600">Post created successfully</p>
+        )}
+      </div>
+      <div className="p-4 border-t bg-gray-50">
+        <Button disabled={pending} className="w-full">
+          {pending ? "Creating..." : "Create Post"}
+        </Button>
+      </div>
     </form>
   );
 }

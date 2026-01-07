@@ -18,7 +18,7 @@ export function PostCardShimmer() {
       </CardHeader>
 
       <CardContent className="p-0">
-        <Skeleton className="h-16 w-full rounded-none bg-slate-200" />
+        <Skeleton className="h-10 w-full rounded-none bg-slate-200" />
         <div className="p-3 space-y-2">
           <Skeleton className="h-4 w-3/4 bg-slate-200" />
           <Skeleton className="h-3 w-full bg-slate-200" />

@@ -351,5 +351,5 @@ export async function getPaginatedApprovedPosts(pageNumber: number) {
   const totalPages = Math.ceil(totalPosts / limit);
   const startIndex = (page - 1) * limit;
   const paginatedData = posts.slice(startIndex, startIndex + limit);
-  return paginatedData;
+  return { paginatedData, totalPages };
 }

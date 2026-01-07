@@ -3,8 +3,8 @@
 import { PostShimmer } from "@/app/_components/PostShimmer";
 import { Button } from "@/components/ui/button";
 import { Post } from "@/lib/definitions";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Page() {
   const { id } = useParams();

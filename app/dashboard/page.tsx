@@ -142,7 +142,7 @@ export default function page() {
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setSelectedPost(null)}
           />
-          <div className="relative bg-white max-w-lg w-full rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="relative bg-white max-w-lg w-full rounded-2xl shadow-2xl overflow-hidden">
             <button
               onClick={() => setSelectedPost(null)}
               className="absolute top-4 right-4 bg-gray-100 rounded-full p-2 hover:bg-gray-200"
