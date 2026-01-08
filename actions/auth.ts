@@ -15,6 +15,7 @@ import { eq } from "drizzle-orm";
 import { getUserById } from "./user";
 
 export async function signup(state: FormState, formData: FormData) {
+  let isSuccess = false;
   try {
     const validateFields = SignupSchema.safeParse({
       name: formData.get("name"),
@@ -58,14 +59,18 @@ export async function signup(state: FormState, formData: FormData) {
       };
     }
     await createCookieSession(user.id);
-    redirect("/");
+    isSuccess = true;
   } catch (error) {
     console.error("Failed to Sigup", error);
     return { success: false };
   }
+  if (isSuccess) {
+    redirect("/");
+  }
 }
 
 export async function signin(state: FormState, formData: FormData) {
+  let isSuccess = false;
   try {
     const validateFields = SigninSchema.safeParse({
       email: formData.get("email"),
@@ -100,19 +105,27 @@ export async function signin(state: FormState, formData: FormData) {
     }
     await createCookieSession(user.id);
 
-    redirect("/");
+    // redirect("/");
+    isSuccess = true;
   } catch (error) {
     console.error("Failed to SignIn: ", error);
+  }
+  if (isSuccess) {
+    redirect("/");
   }
 }
 
 export async function logout() {
+  let isSuccess = false;
   try {
     await deleteCookieSession();
-    redirect("/login");
+    isSuccess = true;
   } catch (error) {
     console.error("Failed to Logout: ", error);
     return { success: false };
+  }
+  if (isSuccess) {
+    redirect("/signin");
   }
 }
 

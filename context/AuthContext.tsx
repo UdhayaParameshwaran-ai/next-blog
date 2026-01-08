@@ -21,11 +21,10 @@ export function AuthProvider({
   children: ReactNode;
   initialUser: User | undefined;
 }) {
-  if (initialUser == undefined) return;
-  const [user, setUser] = useState<User>(initialUser);
+  const [user, setUser] = useState<User>(initialUser ?? null);
 
   useEffect(() => {
-    setUser(initialUser);
+    setUser(initialUser ?? null);
   }, [initialUser]);
 
   return (
