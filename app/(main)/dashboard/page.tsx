@@ -3,7 +3,6 @@ import { approveUpdate, getAllPosts, getUpdatedPosts } from "@/actions/post";
 import { useEffect, useState } from "react";
 import { Post } from "@/lib/definitions";
 import Link from "next/link";
-import { PostCardShimmer } from "../_components/PostCardShimmer";
 import { toast } from "sonner";
 import {
   Card,
@@ -21,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PostCardShimmer } from "@/app/_components/PostCardShimmer";
 
 interface UpdatedPost {
   id: number;

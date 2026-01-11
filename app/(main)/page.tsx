@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/pagination";
 import { useEffect, useState } from "react";
 import { Post } from "@/lib/definitions";
-import { PostCardShimmer } from "./_components/PostCardShimmer";
+import { PostCardShimmer } from "../_components/PostCardShimmer";
 
 export default function Home() {
   const [posts, setPosts] = useState<Post[]>([]);

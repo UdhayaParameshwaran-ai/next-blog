@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import CreatePostForm from "../_components/CreatePost";
+
 import { Post } from "@/lib/definitions";
 import { Button } from "@/components/ui/button";
-import { PostCardShimmer } from "../_components/PostCardShimmer";
+
 import { getUserPosts } from "@/actions/post";
 import {
   Card,
@@ -14,6 +14,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useUser } from "@/context/AuthContext";
+import { PostCardShimmer } from "@/app/_components/PostCardShimmer";
+import CreatePostForm from "@/app/_components/CreatePost";
 
 export default function Page() {
   const [open, setOpen] = useState(false);
