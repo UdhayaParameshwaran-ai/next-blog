@@ -15,6 +15,7 @@ export const SignupSchema = z.object({
       message: "Contain at least one special character.",
     })
     .trim(),
+  role: z.enum(["user", "admin"]).default("user"),
 });
 
 export const SigninSchema = z.object({
@@ -43,6 +44,7 @@ export type FormState =
         name?: string[];
         email?: string[];
         password?: string[];
+        role?: string[];
       };
       message?: string;
     }

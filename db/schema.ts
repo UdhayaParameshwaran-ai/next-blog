@@ -14,11 +14,14 @@ export const postStatusEnum = pgEnum("post_status", [
   "blocked",
 ]);
 
+export const userRoleEnum = pgEnum("user_role", ["user", "admin"]);
+
 export const usersTable = pgTable("users", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: varchar({ length: 255 }).notNull(),
   email: varchar({ length: 255 }).notNull().unique(),
   password: varchar().notNull(),
+  role: userRoleEnum("role").notNull().default("user"),
 });
 
 export const postTable = pgTable("posts", {
@@ -45,4 +48,12 @@ export const updatedPostTable = pgTable("updatedPosts", {
   updatedTitle: varchar().notNull(),
   updatedDescripton: varchar().notNull(),
   updated_at: timestamp("updated_at", { mode: "string" }).default(sql`now()`),
+});
+
+export const refreshTokenTable = pgTable("refreshToken", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  userId: integer().references(() => usersTable.id),
+  token: varchar().notNull(),
+  expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
+  createdAt: timestamp("created_at", { mode: "string" }).default(sql`now()`),
 });

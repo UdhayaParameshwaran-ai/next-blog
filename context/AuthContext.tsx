@@ -8,7 +8,12 @@ import {
   useEffect,
 } from "react";
 
-type User = { id: number; name: string; email: string } | null;
+type User = {
+  id: number;
+  name: string;
+  email: string;
+  role: "user" | "admin";
+} | null;
 
 const AuthContext = createContext<
   { user: User; setUser: (u: User) => void } | undefined

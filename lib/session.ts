@@ -2,22 +2,27 @@ import "server-only";
 import { SignJWT, jwtVerify } from "jose";
 import { SessionPayload } from "./definitions";
 import { cookies } from "next/headers";
+import { db } from "..";
+import { refreshTokenTable } from "@/db/schema";
 
 const secretKey = process.env.SESSION_SECRET;
+export const encodedKey = new TextEncoder().encode(secretKey);
 
-const encodedKey = new TextEncoder().encode(secretKey);
-
-export async function encrypt(payload: SessionPayload) {
+export async function signToken(
+  payload: any,
+  secret: Uint8Array,
+  expiry: string
+) {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("7d")
-    .sign(encodedKey);
+    .setExpirationTime(expiry)
+    .sign(secret);
 }
 
-export async function decrypt(session: string | undefined = "") {
+export async function decrypt(token: string | undefined = "") {
   try {
-    const { payload } = await jwtVerify(session, encodedKey, {
+    const { payload } = await jwtVerify(token, encodedKey, {
       algorithms: ["HS256"],
     });
     return payload;
@@ -26,27 +31,43 @@ export async function decrypt(session: string | undefined = "") {
   }
 }
 
-export async function createCookieSession(userId: number) {
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-  const session = await encrypt({ userId, expiresAt });
+export async function createSession(
+  userId: number,
+  userRole: "admin" | "user"
+) {
+  const accessToken = await signToken({ userId, userRole }, encodedKey, "15m");
+  const refreshToken = await signToken({ userId, userRole }, encodedKey, "7d");
+  const expiresAtDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+  //Storing Refresh Token in DB
+  const refreshTokenData = await db.insert(refreshTokenTable).values({
+    userId: userId,
+    token: refreshToken,
+    expiresAt: expiresAtDate,
+  });
+
   const cookieStore = await cookies();
 
-  cookieStore.set("session", session, {
+  cookieStore.set("accessToken", accessToken, {
     httpOnly: true,
     secure: true,
-    expires: expiresAt,
     sameSite: "lax",
     path: "/",
+    maxAge: 15 * 60, //15mins
+  });
+
+  cookieStore.set("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60, //7days
   });
 }
 
 export async function deleteCookieSession() {
   const cookieStore = await cookies();
-  cookieStore.delete("session");
-}
-
-export async function createLocalSession(userId: number) {
-  const session = await encrypt({ userId });
-  //localStorage.setItem("session", session);
-  return session;
+  cookieStore.delete("refreshToken");
+  cookieStore.delete("accessToken");
+  return;
 }

@@ -20,7 +20,7 @@ export default function Page() {
   const [post, setPost] = useState<Post[]>([]);
   const [isLoading, setLoading] = useState(true);
   const { user } = useUser();
-  const isAdmin = user?.id == 5;
+  const isAdmin = user?.role === "admin";
 
   const fetchPosts = async () => {
     const res = await getUserPosts();

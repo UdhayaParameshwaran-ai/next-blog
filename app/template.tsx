@@ -5,7 +5,10 @@ import { usePathname } from "next/navigation";
 
 export default function Template({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const hideHeader = pathname === "/signup" || pathname === "/signin";
+  const hideHeader =
+    pathname === "/signup" ||
+    pathname === "/signin" ||
+    pathname === "/unauthorized";
   return (
     <div className="flex flex-col min-h-screen">
       {!hideHeader && <Header />}

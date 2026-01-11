@@ -7,7 +7,7 @@ import { logout } from "@/actions/auth";
 
 export default function Header() {
   const { user } = useUser();
-  const isAdmin = user?.id == 5;
+  const isAdmin = user?.role === "admin";
   const handleLogout = async () => {
     await logout();
   };

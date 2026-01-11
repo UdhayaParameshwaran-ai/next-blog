@@ -15,6 +15,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function Signup() {
   const [state, action, pending] = useActionState(signup, undefined);
@@ -24,6 +31,7 @@ export default function Signup() {
       name: "",
       email: "",
       password: "",
+      role: "user",
     },
   });
   const onSubmit = (data: any) => {
@@ -32,6 +40,7 @@ export default function Signup() {
       formData.append("name", data.name);
       formData.append("email", data.email);
       formData.append("password", data.password);
+      formData.append("role", data.role);
       action(formData);
     });
   };
@@ -130,6 +139,34 @@ export default function Signup() {
                 *{state.message}
               </p>
             )}
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center gap-4">
+                    <FormLabel className="font-semibold min-w-[70px]">
+                      Role
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="border-black focus:ring-black">
+                          <SelectValue placeholder="Select a role" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="user">User</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div className="flex flex-col items-center gap-4 pt-2">
               <Link

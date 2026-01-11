@@ -4,12 +4,8 @@ import { FormState, SigninSchema, SignupSchema } from "@/lib/definitions";
 import bcrypt from "bcrypt";
 import { db } from "..";
 import { usersTable } from "@/db/schema";
-import {
-  createCookieSession,
-  decrypt,
-  deleteCookieSession,
-} from "@/lib/session";
-import { redirect, RedirectType } from "next/navigation";
+import { createSession, decrypt, deleteCookieSession } from "@/lib/session";
+import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { eq } from "drizzle-orm";
 import { getUserById } from "./user";
@@ -21,6 +17,7 @@ export async function signup(state: FormState, formData: FormData) {
       name: formData.get("name"),
       email: formData.get("email"),
       password: formData.get("password"),
+      role: formData.get("role"),
     });
 
     if (!validateFields.success) {
@@ -28,7 +25,7 @@ export async function signup(state: FormState, formData: FormData) {
         errors: validateFields.error.flatten().fieldErrors,
       };
     }
-    const { name, email, password } = validateFields.data;
+    const { name, email, password, role } = validateFields.data;
 
     const alreadyExistUser = await db
       .select()
@@ -50,6 +47,7 @@ export async function signup(state: FormState, formData: FormData) {
         name: name,
         email: email,
         password: hashedPassword,
+        role: role,
       })
       .returning();
     const user = data[0];
@@ -58,7 +56,7 @@ export async function signup(state: FormState, formData: FormData) {
         message: "An error occurred while creating your account.",
       };
     }
-    await createCookieSession(user.id);
+    await createSession(user.id, user.role);
     isSuccess = true;
   } catch (error) {
     console.error("Failed to Sigup", error);
@@ -103,9 +101,8 @@ export async function signin(state: FormState, formData: FormData) {
         message: "Invalid email or password",
       };
     }
-    await createCookieSession(user.id);
+    await createSession(user.id, user.role);
 
-    // redirect("/");
     isSuccess = true;
   } catch (error) {
     console.error("Failed to SignIn: ", error);
@@ -131,7 +128,7 @@ export async function logout() {
 
 export async function getCurrentUser() {
   try {
-    const cookie = (await cookies()).get("session")?.value;
+    const cookie = (await cookies()).get("refreshToken")?.value;
     const session = await decrypt(cookie);
     const userId = session?.userId;
     //@ts-ignore
