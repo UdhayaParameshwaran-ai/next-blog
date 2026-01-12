@@ -21,6 +21,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PostCardShimmer } from "@/app/_components/PostCardShimmer";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface UpdatedPost {
   id: number;
@@ -29,6 +37,9 @@ interface UpdatedPost {
   updatedDescripton: string;
   updated_at: string | null;
 }
+type PaginatedItem =
+  | { type: "post"; data: Post }
+  | { type: "update"; data: UpdatedPost };
 
 export default function page() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -37,6 +48,7 @@ export default function page() {
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isHandling, setIsHandling] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const fetchData = async () => {
     try {
@@ -79,7 +91,15 @@ export default function page() {
     if (statusFilter === "all" || statusFilter === "updated") return true;
     return false;
   });
-
+  const combinedItems: PaginatedItem[] = [
+    ...filteredPosts.map((p) => ({ type: "post", data: p } as const)),
+    ...filteredUpdates.map((u) => ({ type: "update", data: u } as const)),
+  ];
+  const totalPages = Math.ceil(combinedItems.length / 8);
+  const paginatedItems = combinedItems.slice(
+    (currentPage - 1) * 8,
+    currentPage * 8
+  );
   if (isLoading)
     return (
       <div className="grid space-x-2 grid-cols-4">
@@ -91,7 +111,7 @@ export default function page() {
     );
 
   return (
-    <div className="px-10 ">
+    <div className="px-10 flex flex-col h-[80vh]">
       <Select value={statusFilter} onValueChange={setStatusFilter}>
         <SelectTrigger className="w-[180px] m-5">
           <SelectValue placeholder="Select a filter" />
@@ -108,38 +128,44 @@ export default function page() {
         </SelectContent>
       </Select>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch mt-5">
-        {filteredPosts.map((post) => (
-          <Card key={post.id}>
-            <CardHeader postStatus={post.status}>
-              <CardTitle>{post.title}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>{post.description}</p>
-            </CardContent>
-            <CardFooter
-              href={`dashboard/userPost/${post.id}`}
-              likes={post.upvotes}
-            ></CardFooter>
-          </Card>
-        ))}
-        {filteredUpdates.map((post) => (
-          <Card key={post.id}>
-            <CardHeader postStatus="updated">
-              <CardTitle>{post.updatedTitle}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>{post.updatedDescripton}</p>
-            </CardContent>
-            <CardFooter>
-              <button
-                onClick={() => setSelectedPost(post)}
-                className="text-blue-600 hover:text-blue-800 text-sm font-semibold cursor-pointer"
-              >
-                View Details →
-              </button>
-            </CardFooter>
-          </Card>
-        ))}
+        {paginatedItems.map((item) => {
+          if (item.type === "post") {
+            const post = item.data;
+            return (
+              <Card key={`post-${post.id}`}>
+                <CardHeader postStatus={post.status}>
+                  <CardTitle>{post.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>{post.description}</p>
+                </CardContent>
+                <CardFooter
+                  href={`dashboard/userPost/${post.id}`}
+                  likes={post.upvotes}
+                />
+              </Card>
+            );
+          }
+          const post = item.data;
+          return (
+            <Card key={`update-${post.id}`}>
+              <CardHeader postStatus="updated">
+                <CardTitle>{post.updatedTitle}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>{post.updatedDescripton}</p>
+              </CardContent>
+              <CardFooter>
+                <button
+                  onClick={() => setSelectedPost(post)}
+                  className="text-blue-600 hover:text-blue-800 text-sm font-semibold"
+                >
+                  View Details →
+                </button>
+              </CardFooter>
+            </Card>
+          );
+        })}
       </div>
       {selectedPost && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden">
@@ -182,6 +208,45 @@ export default function page() {
           </div>
         </div>
       )}
+      {/**Pagination */}
+      <div className="mt-auto flex justify-center w-full ">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                className={
+                  currentPage == 1
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
+                }
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentPage((prev) => prev - 1);
+                }}
+              />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink className="bg-gray-100">
+                {currentPage}
+              </PaginationLink>
+            </PaginationItem>
+
+            <PaginationItem>
+              <PaginationNext
+                className={
+                  currentPage >= totalPages
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
+                }
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentPage((prev) => prev + 1);
+                }}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
     </div>
   );
 }

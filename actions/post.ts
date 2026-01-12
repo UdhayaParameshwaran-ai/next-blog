@@ -92,7 +92,6 @@ export async function updatePost(postId: number, formData: FormData) {
         .from(updatedPostTable)
         .where(eq(updatedPostTable.postId, postId));
 
-      console.debug("Entered Update post action", postId, alreadyExists);
       if (alreadyExists.length != 0) {
         const updatedData = await db
           .update(updatedPostTable)
