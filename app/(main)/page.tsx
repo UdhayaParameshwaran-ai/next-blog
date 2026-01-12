@@ -1,5 +1,5 @@
 "use client";
-import { getApprovedPosts, getPaginatedApprovedPosts } from "@/actions/post";
+import { getPaginatedApprovedPosts } from "@/actions/post";
 import {
   Card,
   CardContent,

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Post } from "@/lib/definitions";
 import { Button } from "@/components/ui/button";
 
-import { getUserPosts } from "@/actions/post";
+import { getUserPostsPaginated } from "@/actions/post";
 import {
   Card,
   CardContent,
@@ -16,22 +16,35 @@ import {
 import { useUser } from "@/context/AuthContext";
 import { PostCardShimmer } from "@/app/_components/PostCardShimmer";
 import CreatePostForm from "@/app/_components/CreatePost";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 export default function Page() {
   const [open, setOpen] = useState(false);
-  const [post, setPost] = useState<Post[]>([]);
+  const [post, setPost] = useState<Post[] | undefined>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setLoading] = useState(true);
   const { user } = useUser();
   const isAdmin = user?.role === "admin";
 
   const fetchPosts = async () => {
-    const res = await getUserPosts();
-    if (Array.isArray(res)) {
-      setPost(res);
-    } else {
-      console.error("Failed to fetch Posts:");
+    setLoading(true);
+    try {
+      const data = await getUserPostsPaginated(currentPage);
+      setPost(data?.paginatedData);
+      setTotalPages(data?.totalPages ?? 1);
+    } catch (err) {
+      console.error("Failed to fetch the User posts: ", err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -48,18 +61,18 @@ export default function Page() {
       </div>
     );
   return (
-    <div className="px-10 py-5">
-      <div className="flex justify-between items-center">
+    <div className="px-10 py-5 h-[80vh] flex flex-col">
+      <div className="flex  justify-between items-center">
         <h1 className="text-xl font-bold">Your Posts</h1>
         <Button onClick={() => setOpen(true)}>Create a post +</Button>
       </div>
-      {post.length == 0 && (
+      {post?.length == 0 && (
         <p className="text-gray-900 font-medium mt-10">
           No Posts Yet. Create a post!
         </p>
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch mt-5">
-        {post.map((p) => (
+        {post?.map((p) => (
           <Card key={p.id}>
             <CardHeader postStatus={isAdmin ? undefined : p.status}>
               <CardTitle>{p.title}</CardTitle>
@@ -92,6 +105,46 @@ export default function Page() {
           </div>
         </div>
       )}
+      {/**Pagination */}
+      <div className="mt-auto flex justify-center w-full ">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                className={
+                  currentPage == 1
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
+                }
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentPage((prev) => prev - 1);
+                }}
+              />
+            </PaginationItem>
+
+            <PaginationItem>
+              <PaginationLink className="bg-gray-100">
+                {currentPage}
+              </PaginationLink>
+            </PaginationItem>
+
+            <PaginationItem>
+              <PaginationNext
+                className={
+                  currentPage >= totalPages
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
+                }
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentPage((prev) => prev + 1);
+                }}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
     </div>
   );
 }

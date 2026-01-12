@@ -48,21 +48,6 @@ export async function createPost(state: PostFormState, formData: FormData) {
   }
 }
 
-export async function getUserPosts() {
-  try {
-    const user = await getCurrentUser();
-    const data = await db
-      .select()
-      .from(postTable)
-      //@ts-ignore
-      .where(eq(postTable.author, user?.id));
-    return data;
-  } catch (error) {
-    console.error("Failed to Get User Posts: ", error);
-    return { success: false };
-  }
-}
-
 export async function updatePost(postId: number, formData: FormData) {
   try {
     const user = await getCurrentUser();
@@ -174,19 +159,6 @@ export async function getAllPosts() {
     return posts;
   } catch (error) {
     console.error("Failed to fetch the Posts: ", error);
-    return { success: false };
-  }
-}
-
-export async function getApprovedPosts() {
-  try {
-    const posts = await db
-      .select()
-      .from(postTable)
-      .where(eq(postTable.status, "approved"));
-    return posts;
-  } catch (error) {
-    console.error("Failed to Get Approved Posts: ", error);
     return { success: false };
   }
 }
@@ -318,7 +290,7 @@ export async function getUSerPostById(id: number) {
   }
 }
 
-export async function getUSerPosts(id: number) {
+export async function getUserPosts(id: number) {
   try {
     const user = await getCurrentUser();
     if (!user?.id) {
@@ -346,10 +318,30 @@ export async function getPaginatedApprovedPosts(pageNumber: number) {
     .select()
     .from(postTable)
     .where(eq(postTable.status, "approved"));
-  //return posts;
   const totalPosts = posts.length;
   const totalPages = Math.ceil(totalPosts / limit);
   const startIndex = (page - 1) * limit;
   const paginatedData = posts.slice(startIndex, startIndex + limit);
   return { paginatedData, totalPages };
+}
+
+export async function getUserPostsPaginated(pageNumber: number) {
+  try {
+    const page = pageNumber || 1;
+    const limit = 8;
+    const user = await getCurrentUser();
+    const posts = await db
+      .select()
+      .from(postTable)
+      //@ts-ignore
+      .where(eq(postTable.author, user?.id));
+    const totalPosts = posts.length;
+    const totalPages = Math.ceil(totalPosts / limit);
+    const startIndex = (page - 1) * limit;
+    const paginatedData = posts.slice(startIndex, startIndex + limit);
+    return { paginatedData, totalPages };
+  } catch (error) {
+    console.error("Failed to Get User Posts Paginated: ", error);
+    return { success: false };
+  }
 }

@@ -1,14 +1,7 @@
-"use client";
-import React, { ReactNode } from "react";
-import { usePathname } from "next/navigation";
+import React from "react";
 import Header from "../_components/Header";
 
 export default function Template({ children }: { children: React.ReactNode }) {
-  //  const pathname = usePathname();
-  //   const hideHeader =
-  //     pathname === "/signup" ||
-  //     pathname === "/signin" ||
-  //     pathname === "/unauthorized";
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
