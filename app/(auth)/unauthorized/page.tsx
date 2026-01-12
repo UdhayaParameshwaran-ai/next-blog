@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { ShieldAlert } from "lucide-react";
+import dynamic from "next/dynamic";
+const ShieldAlert = dynamic(() =>
+  import("lucide-react").then((mod) => mod.ShieldAlert)
+);
 import { Button } from "@/components/ui/button";
 
 export default function UnauthorizedPage() {

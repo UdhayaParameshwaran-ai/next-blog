@@ -3,7 +3,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { getCurrentUser } from "@/actions/auth";
 import { AuthProvider } from "@/context/AuthContext";
-import { Toaster } from "sonner";
+import dynamic from "next/dynamic";
+
+const Toaster = dynamic(() => import("sonner").then((mod) => mod.Toaster));
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -33,7 +36,7 @@ export default async function RootLayout({
       >
         <AuthProvider initialUser={user}>
           {children}
-          <Toaster position="bottom-center" />
+          <Toaster position="bottom-center" className="border" />
         </AuthProvider>
       </body>
     </html>

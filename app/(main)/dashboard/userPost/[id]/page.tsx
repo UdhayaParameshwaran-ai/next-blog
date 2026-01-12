@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Post } from "@/lib/definitions";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 
 export default function Page() {
   const { id } = useParams();
@@ -38,8 +37,8 @@ export default function Page() {
       }
 
       const result = await response.json();
+      import("sonner").then((mod) => mod.toast.warning("Post Blocked"));
       setPost(result[0]);
-      toast.success("Post Blocked");
     } catch (error) {
       console.error("Failed to approve post:", error);
     } finally {
@@ -64,7 +63,7 @@ export default function Page() {
 
       const result = await response.json();
       setPost(result[0]);
-      toast.success("Post Approved");
+      import("sonner").then((mod) => mod.toast.success("Post Approved"));
     } catch (error) {
       console.error("Failed to approve post:", error);
     } finally {
@@ -89,7 +88,7 @@ export default function Page() {
       const result = await response.json();
       console.log("Success:", result);
       setPost(result[0]);
-      toast.success("Post Rejected");
+      import("sonner").then((mod) => mod.toast.warning("Post Rejected"));
     } catch (error) {
       console.error("Failed to approve post:", error);
     } finally {
@@ -101,7 +100,7 @@ export default function Page() {
     setIsHandling(true);
     const response = await deletePost(Number(id));
     if (response.message) {
-      toast.success("Post Deleted");
+      import("sonner").then((mod) => mod.toast.warning("Post Deleted"));
       router.push("/dashboard");
     }
     setIsHandling(false);

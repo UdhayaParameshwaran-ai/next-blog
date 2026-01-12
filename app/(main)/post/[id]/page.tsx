@@ -9,7 +9,6 @@ import { useUser } from "@/context/AuthContext";
 import { Post } from "@/lib/definitions";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
-import { toast } from "sonner";
 
 export default function Page() {
   const { id } = useParams();
@@ -108,7 +107,10 @@ function UpdateForm({
   async function handleSubmit(formData: FormData) {
     setIsHandling(true);
     const updatingPost = await updatePost(post.id, formData);
-    if (updatingPost.success) toast.success("Requested for Update.");
+    if (updatingPost.success)
+      import("sonner").then((mod) =>
+        mod.toast.success("Requested for Update.")
+      );
     onComplete();
     setIsHandling(false);
   }

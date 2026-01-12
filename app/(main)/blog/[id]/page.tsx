@@ -7,7 +7,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useUser } from "@/context/AuthContext";
 import { Comments, Post } from "@/lib/definitions";
-import { PencilLine, ThumbsUp } from "lucide-react";
+import dynamic from "next/dynamic";
+const PencilLine = dynamic(
+  () => import("lucide-react").then((mod) => mod.PencilLine),
+  { ssr: false }
+);
+const ThumbsUp = dynamic(
+  () => import("lucide-react").then((mod) => mod.ThumbsUp),
+  { ssr: false }
+);
 import { useParams } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 
@@ -66,7 +74,6 @@ export default function Page() {
 
   useEffect(() => {
     const fetchAllData = async () => {
-      if (!id) return;
       setLoading(true);
       try {
         const [postRes, commentsRes] = await Promise.all([

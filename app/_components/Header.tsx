@@ -1,6 +1,10 @@
 "use client";
 import { useUser } from "@/context/AuthContext";
-import { CircleUserRound } from "lucide-react";
+import dynamic from "next/dynamic";
+const CircleUserRound = dynamic(
+  () => import("lucide-react").then((mod) => mod.CircleUserRound),
+  { ssr: false }
+);
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/actions/auth";
