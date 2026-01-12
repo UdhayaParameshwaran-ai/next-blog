@@ -22,7 +22,6 @@ export async function getCommentsbyPostId(postId: number) {
 
 export async function addComment(
   extraData: { post: number; author: number },
-  prevState: any,
   formData: FormData
 ) {
   try {
@@ -39,6 +38,7 @@ export async function addComment(
     if (comment) {
       return {
         success: true,
+        data: comment[0],
       };
     }
   } catch (error) {

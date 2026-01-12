@@ -1,6 +1,6 @@
 "use client";
 
-import { updatePost, deletePost, getUserPosts } from "@/actions/post";
+import { updatePost, deletePost, getUserPostById } from "@/actions/post";
 import { PostShimmer } from "@/app/_components/PostShimmer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,13 +16,13 @@ export default function Page() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const { user } = useUser();
-  const isUser = user?.id != 5;
-  const [post, setPost] = useState<Post>();
+  const isUser = user?.role != "admin";
+  const [post, setPost] = useState<Post | undefined>();
   const [isLoading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
 
   const fetchPost = async () => {
-    const res = await getUserPosts(Number(id));
+    const res = await getUserPostById(Number(id));
     if (!res.data) return;
     setPost(res?.data);
     setLoading(false);

@@ -147,7 +147,7 @@ export async function deletePost(postId: number | undefined) {
       message: "Post Deleted Successfully",
     };
   } catch (error) {
-    console.error("Failed to Delete the post.");
+    console.error("Failed to Delete the post.", error);
     return { success: false };
   }
 }
@@ -169,11 +169,13 @@ export async function getPostbyId(postId: number) {
       .from(postTable)
       .where(eq(postTable.id, postId));
     const postData = post[0];
-
+    if (postData.author === null) {
+      throw new Error("Author is required");
+    }
     const author = await db
       .select()
       .from(usersTable)
-      //@ts-ignore
+
       .where(eq(usersTable.id, postData.author));
     const authorData = author[0];
     return {
@@ -240,6 +242,9 @@ export async function approveUpdate(postId: number) {
       .from(updatedPostTable)
       .where(eq(updatedPostTable.postId, postId));
     const updatedPostData = updatedPostTableData[0];
+    if (updatedPostData.postId === null) {
+      throw new Error("PostId is required");
+    }
     const updatedPost = await db
       .update(postTable)
       .set({
@@ -248,7 +253,6 @@ export async function approveUpdate(postId: number) {
         updated_at: updatedPostData.updated_at,
         status: "approved",
       })
-      //@ts-ignore
       .where(eq(postTable.id, updatedPostData.postId))
       .returning();
     await db
@@ -261,7 +265,7 @@ export async function approveUpdate(postId: number) {
   }
 }
 
-export async function getUSerPostById(id: number) {
+export async function getUserPostById(id: number) {
   try {
     const user = await getCurrentUser();
     if (!user?.id) {
@@ -270,35 +274,7 @@ export async function getUSerPostById(id: number) {
     const data = await db
       .select()
       .from(postTable)
-      .where(
-        and(
-          //@ts-ignore
-          eq(postTable.author, user.id),
-          //@ts-ignore
-          eq(postTable.id, parseInt(id))
-        )
-      );
-    const post = data[0];
-    if (!post) {
-      return { error: "No Such Post", data: null };
-    }
-    return { error: null, data: post };
-  } catch (error) {
-    console.error("Action Error:", error);
-    return { error: "Internal Server Error", data: null };
-  }
-}
-
-export async function getUserPosts(id: number) {
-  try {
-    const user = await getCurrentUser();
-    if (!user?.id) {
-      return { error: "Unauthorized", data: null };
-    }
-    const data = await db.select().from(postTable).where(
-      //@ts-ignore
-      eq(postTable.author, user.id)
-    );
+      .where(and(eq(postTable.author, user.id), eq(postTable.id, id)));
     const post = data[0];
     if (!post) {
       return { error: "No Such Post", data: null };
@@ -329,10 +305,12 @@ export async function getUserPostsPaginated(pageNumber: number) {
     const page = pageNumber || 1;
     const limit = 8;
     const user = await getCurrentUser();
+    if (user === null || user === undefined) {
+      throw new Error("User ID is required");
+    }
     const posts = await db
       .select()
       .from(postTable)
-      //@ts-ignore
       .where(eq(postTable.author, user?.id));
     const totalPosts = posts.length;
     const totalPages = Math.ceil(totalPosts / limit);

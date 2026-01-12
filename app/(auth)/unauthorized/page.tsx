@@ -13,17 +13,13 @@ export default function UnauthorizedPage() {
         <h1 className="text-3xl font-bold text-black mb-2">Access Denied</h1>
 
         <p className="text-gray-600 mb-8">
-          Oops! You don't have the permission level required to view the
+          {"Oops! You don't have the permission level required to view the"}
           <strong> Dashboard</strong>. Please contact your administrator if you
           believe this is a mistake.
         </p>
 
         <div className="flex flex-col w-full gap-3">
-          <Button
-            asChild
-            variant="default"
-            className="bg-black hover:bg-gray-800 text-white"
-          >
+          <Button asChild variant="default">
             <Link href="/">Back to Home</Link>
           </Button>
 

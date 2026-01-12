@@ -18,6 +18,13 @@ export const SignupSchema = z.object({
   role: z.enum(["user", "admin"]).default("user"),
 });
 
+export type SignupValues = {
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+};
+
 export const SigninSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }).trim(),
   password: z
@@ -30,6 +37,8 @@ export const SigninSchema = z.object({
     })
     .trim(),
 });
+
+export type LoginValues = z.infer<typeof SigninSchema>;
 
 export const PostSchema = z.object({
   title: z.string().min(3, { message: "Title should atleast 3 chars" }).trim(),
@@ -88,7 +97,7 @@ export type Post = {
 
 export type Comments = {
   id: number;
-  //post:number,
+  //post: number;
   comment: string;
   author: string;
 };
@@ -104,3 +113,8 @@ export type CommentFormState =
       message?: string;
     }
   | undefined;
+
+export const SessionSchema = z.object({
+  userId: z.number(),
+  userRole: z.enum(["user", "admin"]),
+});

@@ -122,10 +122,12 @@ export default function Page() {
   return (
     <div className="max-w-3/4 mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center border-b pb-4">
-        <h1 className="text-3xl font-bold">{post.title}</h1>
-        <span className="inline-block mt-4 px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">
-          Status: {post.status}
-        </span>
+        <div className="flex flex-col items-start">
+          <h1 className="text-3xl font-bold">{post.title}</h1>
+          <span className="mt-4 px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm inline-block">
+            Status: {post.status}
+          </span>
+        </div>
 
         <div className="space-x-2">
           {post.status != "submitted" && (

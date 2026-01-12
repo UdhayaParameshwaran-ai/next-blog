@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SignupValues } from "@/lib/definitions";
 
 export default function Signup() {
   const [state, action, pending] = useActionState(signup, undefined);
@@ -34,7 +35,7 @@ export default function Signup() {
       role: "user",
     },
   });
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: SignupValues) => {
     startTransition(() => {
       const formData = new FormData();
       formData.append("name", data.name);

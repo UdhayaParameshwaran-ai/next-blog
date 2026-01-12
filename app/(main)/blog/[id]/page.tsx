@@ -24,12 +24,30 @@ export default function Page() {
   const [isHandling, setIsHandling] = useState(false);
 
   const { user } = useUser();
-  const initialState = { message: null, success: false };
-  const addCommentWithIds = addComment.bind(null, {
-    post: Number(id),
-    //@ts-ignore
-    author: user?.id,
-  });
+
+  type CommentActionState = {
+    message: string | null;
+    success: boolean;
+    newComment?: Comments;
+  };
+  const initialState: CommentActionState = { message: null, success: false };
+
+  const addCommentWithIds = async (
+    state: CommentActionState | undefined,
+    formData: FormData
+  ): Promise<CommentActionState> => {
+    const commentText = formData.get("comment") as string;
+    if (!user?.id) throw new Error("User not logged in");
+
+    const res = await addComment(
+      { post: Number(id), author: user.id },
+      formData
+    );
+    return {
+      message: null,
+      success: res?.success ?? false,
+    };
+  };
 
   const [state, formAction] = useActionState(addCommentWithIds, initialState);
 
@@ -67,9 +85,25 @@ export default function Page() {
         setLoading(false);
       }
     };
-
     fetchAllData();
   }, [id]);
+  useEffect(() => {
+    if (state?.success) {
+      const fetchComments = async () => {
+        if (!id) return;
+        try {
+          const commentsRes = await getCommentsbyPostId(Number(id));
+          if (Array.isArray(commentsRes)) {
+            setComments(commentsRes);
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      };
+
+      fetchComments();
+    }
+  }, [state?.success, id]);
 
   if (isLoading)
     return (

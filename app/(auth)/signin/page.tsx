@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { LoginValues } from "@/lib/definitions";
 
 export default function Signin() {
   const [state, action, pending] = useActionState(signin, undefined);
@@ -25,7 +26,7 @@ export default function Signin() {
     },
   });
 
-  const onSubmit = (values: any) => {
+  const onSubmit = (values: LoginValues) => {
     startTransition(() => {
       const formData = new FormData();
       formData.append("email", values.email);
@@ -105,7 +106,7 @@ export default function Signin() {
                 href="/signup"
                 className="text-blue-500 text-sm hover:underline"
               >
-                Don't have an Account? Sign Up
+                {"Don't have an account?"}
               </Link>
 
               {state?.message && (

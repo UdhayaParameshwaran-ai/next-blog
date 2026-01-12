@@ -1,6 +1,11 @@
 "use server";
 
-import { FormState, SigninSchema, SignupSchema } from "@/lib/definitions";
+import {
+  FormState,
+  SessionSchema,
+  SigninSchema,
+  SignupSchema,
+} from "@/lib/definitions";
 import bcrypt from "bcrypt";
 import { db } from "..";
 import { usersTable } from "@/db/schema";
@@ -129,10 +134,9 @@ export async function logout() {
 export async function getCurrentUser() {
   try {
     const cookie = (await cookies()).get("refreshToken")?.value;
-    const session = await decrypt(cookie);
-    const userId = session?.userId;
-    //@ts-ignore
-    const data = await getUserById(userId);
+    if (!cookie) throw new Error("No refresh token");
+    const session = SessionSchema.parse(await decrypt(cookie));
+    const data = await getUserById(session.userId);
     return data;
   } catch (error) {
     console.error("Failed to Get the CurrentUser: ", error);
