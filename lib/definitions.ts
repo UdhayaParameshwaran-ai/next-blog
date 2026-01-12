@@ -74,7 +74,7 @@ export type PostFormState =
 
 export type SessionPayload = {
   userId: number;
-  expiresAt?: Date;
+  userRole: string;
 };
 
 export type User = {

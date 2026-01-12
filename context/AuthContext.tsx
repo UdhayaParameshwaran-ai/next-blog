@@ -24,13 +24,10 @@ export function AuthProvider({
   initialUser,
 }: {
   children: ReactNode;
-  initialUser: User | undefined;
+  initialUser?: User | null;
 }) {
-  const [user, setUser] = useState<User>(initialUser ?? null);
-
-  useEffect(() => {
-    setUser(initialUser ?? null);
-  }, [initialUser]);
+  const normalizedUser = initialUser ?? null;
+  const [user, setUser] = useState<User | null>(normalizedUser);
 
   return (
     <AuthContext.Provider value={{ user, setUser }}>

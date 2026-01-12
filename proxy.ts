@@ -30,7 +30,7 @@ export default async function Proxy(request: NextRequest) {
       }
       return NextResponse.next();
     } catch (err) {
-      console.log("Expired or invalid access Token");
+      console.log("Expired or invalid access Token", err);
     }
   }
 
@@ -50,6 +50,7 @@ export default async function Proxy(request: NextRequest) {
       );
       return NextResponse.redirect(refreshUrl);
     } catch (err) {
+      console.log("Error while validating refresh token", err);
       return NextResponse.redirect(new URL("/signin", request.url));
     }
   }

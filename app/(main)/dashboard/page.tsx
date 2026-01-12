@@ -41,7 +41,7 @@ type PaginatedItem =
   | { type: "post"; data: Post }
   | { type: "update"; data: UpdatedPost };
 
-export default function page() {
+export default function Page() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [updatedPosts, setUpdatedPosts] = useState<UpdatedPost[]>([]);
   const [selectedPost, setSelectedPost] = useState<UpdatedPost | null>(null);

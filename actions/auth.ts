@@ -134,7 +134,7 @@ export async function logout() {
 export async function getCurrentUser() {
   try {
     const cookie = (await cookies()).get("refreshToken")?.value;
-    if (!cookie) throw new Error("No refresh token");
+    if (!cookie) return null;
     const session = SessionSchema.parse(await decrypt(cookie));
     const data = await getUserById(session.userId);
     return data;

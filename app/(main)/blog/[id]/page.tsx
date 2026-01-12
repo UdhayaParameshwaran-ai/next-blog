@@ -36,7 +36,6 @@ export default function Page() {
     state: CommentActionState | undefined,
     formData: FormData
   ): Promise<CommentActionState> => {
-    const commentText = formData.get("comment") as string;
     if (!user?.id) throw new Error("User not logged in");
 
     const res = await addComment(

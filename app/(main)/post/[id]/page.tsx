@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useUser } from "@/context/AuthContext";
 import { Post } from "@/lib/definitions";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 export default function Page() {
@@ -21,16 +21,23 @@ export default function Page() {
   const [isLoading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
 
-  const fetchPost = async () => {
-    const res = await getUserPostById(Number(id));
-    if (!res.data) return;
-    setPost(res?.data);
-    setLoading(false);
-  };
+  const fetchPost = useCallback(async () => {
+    if (!id) return;
 
+    try {
+      setLoading(true);
+      const res = await getUserPostById(Number(id));
+      if (!res.data) return;
+      setPost(res.data);
+    } catch (error) {
+      console.log("Error while fetching the posts: ", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
   useEffect(() => {
     fetchPost();
-  }, [id]);
+  }, [fetchPost]);
 
   const handleDelete = () => {
     if (confirm("Are you sure?")) {
