@@ -5,8 +5,13 @@ import { db } from "..";
 import { refreshTokenTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { SessionPayload } from "./definitions";
+import bcrypt from "bcrypt";
 
-const secretKey = process.env.SESSION_SECRET;
+const secretKey =
+  process.env.SESSION_SECRET ??
+  (() => {
+    throw new Error("Missing required environment variable: SESSION_SECRET");
+  })();
 export const encodedKey = new TextEncoder().encode(secretKey);
 
 export async function signToken(
@@ -56,11 +61,12 @@ export async function createSession(
     const expiresAtDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
     //Storing Refresh Token in DB
+    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
     const refreshTokenData = await db
       .insert(refreshTokenTable)
       .values({
         userId: userId,
-        token: refreshToken,
+        token: hashedRefreshToken,
         expiresAt: expiresAtDate,
       })
       .returning();
@@ -73,7 +79,8 @@ export async function createSession(
 
     cookieStore.set("accessToken", accessToken, {
       httpOnly: true,
-      secure: true,
+      // secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
       maxAge: 15 * 60, //15mins
@@ -81,7 +88,8 @@ export async function createSession(
 
     cookieStore.set("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: true,
+      //secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
       maxAge: 7 * 24 * 60 * 60, //7days
@@ -98,10 +106,34 @@ export async function deleteCookieSession() {
     if (refreshToken === undefined) {
       throw new Error("Failed to get refreshToken in cookies");
     }
+
+    const { payload } = await jwtVerify(refreshToken, encodedKey);
+    const userId = payload.userId as number;
+    const userRole = payload.userRole;
+
+    const stored = await db
+      .select()
+      .from(refreshTokenTable)
+      .where(eq(refreshTokenTable.userId, userId));
+
+    let matchedRow: any = null;
+    for (const row of stored) {
+      const match = await bcrypt.compare(refreshToken, row.token);
+      if (match) {
+        matchedRow = row;
+        break;
+      }
+    }
+    //If nothing matched, token is invalid/already used
+    if (!matchedRow) {
+      throw new Error("Token replay detected or token doesn't exist");
+    }
+
     const deletedToken = await db
       .delete(refreshTokenTable)
-      .where(eq(refreshTokenTable.token, refreshToken))
+      .where(eq(refreshTokenTable.id, matchedRow.id))
       .returning();
+
     if (deletedToken.length == 0)
       console.log("Failed to deleted the refresh token in DB");
     cookieStore.delete("refreshToken");

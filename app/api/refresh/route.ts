@@ -4,6 +4,7 @@ import { encodedKey } from "@/lib/session";
 import { db } from "@/index";
 import { refreshTokenTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import bcrypt from "bcrypt";
 
 export async function GET(request: NextRequest) {
   const oldRefreshToken = request.cookies.get("refreshToken")?.value;
@@ -14,21 +15,36 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    //Verify the old token's integrity
+    // Verify the old token's integrity
     const { payload } = await jwtVerify(oldRefreshToken, encodedKey);
     const userId = payload.userId as number;
     const userRole = payload.userRole;
 
-    const deleted = await db
-      .delete(refreshTokenTable)
-      .where(eq(refreshTokenTable.token, oldRefreshToken))
-      .returning();
+    // Fetch stored (hashed) tokens for the user and compare
+    const stored = await db
+      .select()
+      .from(refreshTokenTable)
+      .where(eq(refreshTokenTable.userId, userId));
 
-    // 2. REPLAY PROTECTION: If nothing was deleted, the token was invalid/already used
-    if (deleted.length === 0) {
+    let matchedRow: any = null;
+    for (const row of stored) {
+      const match = await bcrypt.compare(oldRefreshToken, row.token);
+      if (match) {
+        matchedRow = row;
+        break;
+      }
+    }
+
+    //If nothing matched, token is invalid/already used
+    if (!matchedRow) {
       console.error("Token replay detected or token doesn't exist");
       return NextResponse.redirect(new URL("/signin", request.url));
     }
+
+    //Delete the matched token to prevent reuse
+    await db
+      .delete(refreshTokenTable)
+      .where(eq(refreshTokenTable.id, matchedRow.id));
 
     const newAccessToken = await new SignJWT({ userId, userRole })
       .setProtectedHeader({ alg: "HS256" })
@@ -42,18 +58,20 @@ export async function GET(request: NextRequest) {
       .setExpirationTime("7d")
       .sign(encodedKey);
 
+    // Store hashed new refresh token
+    const hashed = await bcrypt.hash(newRefreshToken, 10);
     await db.insert(refreshTokenTable).values({
-      token: newRefreshToken,
+      token: hashed,
       userId: userId,
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
 
-    //Set cookies and Redirect
+    // Set cookies and Redirect
     const response = NextResponse.redirect(new URL(redirectPath, request.url));
 
     response.cookies.set("accessToken", newAccessToken, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
       maxAge: 15 * 60,
@@ -61,7 +79,7 @@ export async function GET(request: NextRequest) {
 
     response.cookies.set("refreshToken", newRefreshToken, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
       maxAge: 7 * 24 * 60 * 60,
