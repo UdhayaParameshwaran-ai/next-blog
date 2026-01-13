@@ -11,9 +11,11 @@ import { db } from "..";
 import { usersTable } from "@/db/schema";
 import { createSession, decrypt, deleteCookieSession } from "@/lib/session";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { eq } from "drizzle-orm";
 import { getUserById } from "./user";
+import { rateLimit } from "@/lib/rateLimiter";
+import { getClientIp } from "@/lib/getClientIP";
 
 export async function signup(state: FormState, formData: FormData) {
   let isSuccess = false;
@@ -75,6 +77,16 @@ export async function signup(state: FormState, formData: FormData) {
 export async function signin(state: FormState, formData: FormData) {
   let isSuccess = false;
   try {
+    try {
+      const ip = getClientIp();
+      await rateLimit(`signin:${ip}:${formData.get("email")}`, 5, 60);
+    } catch (error) {
+      console.error(error);
+      return {
+        message: "Too many SignIn attempts, Please try after later.",
+      };
+    }
+
     const validateFields = SigninSchema.safeParse({
       email: formData.get("email"),
       password: formData.get("password"),
@@ -103,7 +115,7 @@ export async function signin(state: FormState, formData: FormData) {
 
     if (!isValid) {
       return {
-        message: "Invalid email or password",
+        message: "Incorrect password",
       };
     }
     await createSession(user.id, user.role);
