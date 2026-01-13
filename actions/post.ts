@@ -343,39 +343,55 @@ export async function getUserPostById(id: number) {
 }
 
 export async function getPaginatedApprovedPosts(pageNumber: number) {
-  const page = pageNumber || 1;
-  const limit = 8;
-  const posts = await db
-    .select()
-    .from(postTable)
-    .where(eq(postTable.status, "approved"));
-  const totalPosts = posts.length;
-  const totalPages = Math.ceil(totalPosts / limit);
-  const startIndex = (page - 1) * limit;
-  const paginatedData = posts.slice(startIndex, startIndex + limit);
-  return { paginatedData, totalPages };
+  try {
+    const page = pageNumber && pageNumber > 0 ? pageNumber : 1;
+    const limit = 8;
+    const offset = (page - 1) * limit;
+    const paginatedData = await db
+      .select()
+      .from(postTable)
+      .where(eq(postTable.status, "approved"))
+      .limit(limit)
+      .offset(offset);
+    const [{ count }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(postTable)
+      .where(eq(postTable.status, "approved"));
+    const totalPages = Math.ceil(count / limit);
+
+    return { paginatedData, totalPages };
+  } catch (error) {
+    console.error("Failed to get approved posts paginated", error);
+    return { paginatedData: [], totalPages: 0 };
+  }
 }
 
 export async function getUserPostsPaginated(pageNumber: number) {
   try {
-    const page = pageNumber || 1;
+    const page = pageNumber && pageNumber > 0 ? pageNumber : 1;
     const limit = 8;
+    const offset = (page - 1) * limit;
     const user = await getCurrentUser();
-    if (user === null || user === undefined) {
+    if (!user?.id) {
       throw new Error("User ID is required");
     }
-    const posts = await db
+    const paginatedData = await db
       .select()
       .from(postTable)
-      .where(eq(postTable.author, user?.id));
-    const totalPosts = posts.length;
-    const totalPages = Math.ceil(totalPosts / limit);
-    const startIndex = (page - 1) * limit;
-    const paginatedData = posts.slice(startIndex, startIndex + limit);
+      .where(eq(postTable.author, user.id))
+      .limit(limit)
+      .offset(offset);
+    const [{ count }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(postTable)
+      .where(eq(postTable.author, user.id));
+
+    const totalPages = Math.ceil(count / limit);
+
     return { paginatedData, totalPages };
   } catch (error) {
-    console.error("Failed to Get User Posts Paginated: ", error);
-    return { success: false };
+    console.error("Failed to get user posts paginated", error);
+    return { paginatedData: [], totalPages: 0 };
   }
 }
 
