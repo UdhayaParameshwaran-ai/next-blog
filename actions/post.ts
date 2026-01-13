@@ -9,6 +9,7 @@ import {
 } from "@/db/schema";
 import { db } from "..";
 import { and, eq, sql } from "drizzle-orm";
+import * as Sentry from "@sentry/nextjs";
 
 export async function createPost(state: PostFormState, formData: FormData) {
   try {
@@ -51,6 +52,7 @@ export async function createPost(state: PostFormState, formData: FormData) {
     };
   } catch (error) {
     console.error("Failed to CreatePost: ", error);
+    Sentry.logger.error("Failed to Create Post", { error });
     return { success: false };
   }
 }
@@ -140,6 +142,7 @@ export async function updatePost(postId: number, formData: FormData) {
     }
   } catch (error) {
     console.error("Failed to update the Post: ", error);
+    Sentry.logger.error("Failed to Update the Post", { error });
     return { success: false };
   }
 }
@@ -157,6 +160,7 @@ export async function deletePost(postId: number | undefined) {
     };
   } catch (error) {
     console.error("Failed to Delete the post.", error);
+    Sentry.logger.error("Failed to Delete the Post", { error });
     return { success: false };
   }
 }
@@ -167,6 +171,7 @@ export async function getAllPosts() {
     return posts;
   } catch (error) {
     console.error("Failed to fetch the Posts: ", error);
+    Sentry.logger.error("Failed to Get all the Posts", { error });
     return { success: false };
   }
 }
@@ -196,6 +201,7 @@ export async function getPostbyId(postId: number) {
     };
   } catch (error) {
     console.error("Failed to Get the Post: ", error);
+    Sentry.logger.error("Failed to Get the Post", { error });
     return { success: false };
   }
 }
@@ -236,6 +242,7 @@ export async function likePostbyId(postId: number) {
     };
   } catch (error) {
     console.error("Failed to like post:", error);
+    Sentry.logger.error("Failed to like the Post", { error });
     return { success: false };
   }
 }
@@ -277,6 +284,7 @@ export async function unlikePostbyId(postId: number) {
     };
   } catch (error) {
     console.error("Failed to Unlike post:", error);
+    Sentry.logger.error("Failed to like the Post", { error });
     return { success: false };
   }
 }
@@ -287,6 +295,7 @@ export async function getUpdatedPosts() {
     return updatedPosts;
   } catch (error) {
     console.error("Failed to Get Updated Posts: ", error);
+    Sentry.logger.error("Failed to Get the UpdatedPosts", { error });
     return { success: false };
   }
 }
@@ -317,6 +326,7 @@ export async function approveUpdate(postId: number) {
     return updatedPost;
   } catch (error) {
     console.error("Failed to Approve the Updated post: ", error);
+    Sentry.logger.error("Failed to Approve the Updated Post", { error });
     return { success: false };
   }
 }
@@ -338,6 +348,7 @@ export async function getUserPostById(id: number) {
     return { error: null, data: post };
   } catch (error) {
     console.error("Action Error:", error);
+    Sentry.logger.error("Failed to Get the UserPost", { error });
     return { error: "Internal Server Error", data: null };
   }
 }
@@ -362,6 +373,7 @@ export async function getPaginatedApprovedPosts(pageNumber: number) {
     return { paginatedData, totalPages };
   } catch (error) {
     console.error("Failed to get approved posts paginated", error);
+    Sentry.logger.error("Failed to Get approved Posts Paginated", { error });
     return { paginatedData: [], totalPages: 0 };
   }
 }
@@ -391,6 +403,7 @@ export async function getUserPostsPaginated(pageNumber: number) {
     return { paginatedData, totalPages };
   } catch (error) {
     console.error("Failed to get user posts paginated", error);
+    Sentry.logger.error("Failed to Get UserPosts", { error });
     return { paginatedData: [], totalPages: 0 };
   }
 }
@@ -408,7 +421,8 @@ export async function isUserLikedPost(postId: number) {
         and(eq(likesTable.postId, postId), eq(likesTable.userId, user?.id))
       );
     return likedPost.length != 0;
-  } catch (err) {
-    console.log("Error while checking post isLisked: ", err);
+  } catch (error) {
+    console.log("Error while checking post isLisked: ", error);
+    Sentry.logger.error("Failed While checking post isLiked", { error });
   }
 }

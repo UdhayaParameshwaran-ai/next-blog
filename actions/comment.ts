@@ -3,6 +3,8 @@
 import { commentsTable, usersTable } from "@/db/schema";
 import { db } from "..";
 import { eq } from "drizzle-orm";
+import * as Sentry from "@sentry/nextjs";
+
 export async function getCommentsbyPostId(postId: number) {
   try {
     const data = await db
@@ -17,6 +19,7 @@ export async function getCommentsbyPostId(postId: number) {
     return data;
   } catch (error) {
     console.error("Failed to get the Comments: ", error);
+    Sentry.logger.error("Failed to Get the comments", { error });
   }
 }
 
@@ -43,5 +46,6 @@ export async function addComment(
     }
   } catch (error) {
     console.error("Failed to add Comment: ", error);
+    Sentry.logger.error("Failed to add comments", { error });
   }
 }

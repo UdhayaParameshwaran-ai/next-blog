@@ -2,6 +2,7 @@
 import { usersTable } from "@/db/schema";
 import { db } from "..";
 import { eq } from "drizzle-orm";
+import * as Sentry from "@sentry/nextjs";
 
 export async function getUserById(userId: number) {
   try {
@@ -14,5 +15,6 @@ export async function getUserById(userId: number) {
     return user;
   } catch (error) {
     console.error("Failed to Get the current user: ", error);
+    Sentry.logger.error("Failed to get the UserbyID", { error });
   }
 }

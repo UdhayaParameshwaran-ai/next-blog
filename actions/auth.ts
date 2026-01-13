@@ -11,11 +11,12 @@ import { db } from "..";
 import { usersTable } from "@/db/schema";
 import { createSession, decrypt, deleteCookieSession } from "@/lib/session";
 import { redirect } from "next/navigation";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { eq } from "drizzle-orm";
 import { getUserById } from "./user";
 import { rateLimit } from "@/lib/rateLimiter";
 import { getClientIp } from "@/lib/getClientIP";
+import * as Sentry from "@sentry/nextjs";
 
 export async function signup(state: FormState, formData: FormData) {
   let isSuccess = false;
@@ -66,7 +67,8 @@ export async function signup(state: FormState, formData: FormData) {
     await createSession(user.id, user.role);
     isSuccess = true;
   } catch (error) {
-    console.error("Failed to Sigup", error);
+    console.error("Failed to Signup", error);
+    Sentry.logger.error("Failed to Sigup", { error });
     return { success: false };
   }
   if (isSuccess) {
@@ -81,7 +83,7 @@ export async function signin(state: FormState, formData: FormData) {
       const ip = getClientIp();
       await rateLimit(`signin:${ip}:${formData.get("email")}`, 5, 60);
     } catch (error) {
-      console.error(error);
+      Sentry.logger.error("Auth API RateLimited: ", { error });
       return {
         message: "Too many SignIn attempts, Please try after later.",
       };
@@ -123,6 +125,7 @@ export async function signin(state: FormState, formData: FormData) {
     isSuccess = true;
   } catch (error) {
     console.error("Failed to SignIn: ", error);
+    Sentry.logger.error("Failed to SigIn", { error });
   }
   if (isSuccess) {
     redirect("/");
@@ -136,6 +139,7 @@ export async function logout() {
     isSuccess = true;
   } catch (error) {
     console.error("Failed to Logout: ", error);
+    Sentry.logger.error("Failed to Logout", { error });
     return { success: false };
   }
   if (isSuccess) {
@@ -151,6 +155,7 @@ export async function getCurrentUser() {
     const data = await getUserById(session.userId);
     return data;
   } catch (error) {
-    console.error("Failed to Get the CurrentUser: ", error);
+    console.error("Failed to Get the current user", error);
+    Sentry.logger.error("Failed to Get the current user", { error });
   }
 }
