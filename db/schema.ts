@@ -57,3 +57,9 @@ export const refreshTokenTable = pgTable("refreshToken", {
   expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
   createdAt: timestamp("created_at", { mode: "string" }).default(sql`now()`),
 });
+
+export const likesTable = pgTable("likes", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  postId: integer().references(() => postTable.id),
+  userId: integer().references(() => usersTable.id),
+});

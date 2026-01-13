@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useContext, ReactNode, useState } from "react";
+import {
+  createContext,
+  useContext,
+  ReactNode,
+  useState,
+  useEffect,
+} from "react";
 
 type User = {
   id: number;
@@ -20,8 +26,10 @@ export function AuthProvider({
   children: ReactNode;
   initialUser?: User | null;
 }) {
-  const normalizedUser = initialUser ?? null;
-  const [user, setUser] = useState<User | null>(normalizedUser);
+  const [user, setUser] = useState<User>(initialUser ?? null);
+  useEffect(() => {
+    setUser(initialUser ?? null);
+  }, [initialUser]);
 
   return (
     <AuthContext.Provider value={{ user, setUser }}>

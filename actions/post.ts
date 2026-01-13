@@ -1,16 +1,23 @@
 "use server";
 import { PostFormState, PostSchema } from "@/lib/definitions";
 import { getCurrentUser } from "./auth";
-import { postTable, updatedPostTable, usersTable } from "@/db/schema";
+import {
+  likesTable,
+  postTable,
+  updatedPostTable,
+  usersTable,
+} from "@/db/schema";
 import { db } from "..";
 import { and, eq, sql } from "drizzle-orm";
 
 export async function createPost(state: PostFormState, formData: FormData) {
   try {
     const user = await getCurrentUser();
+    const formTitle = String(formData.get("title") ?? "");
+    const formDescription = String(formData.get("description") ?? "");
     const validateFields = PostSchema.safeParse({
-      title: formData.get("title"),
-      description: formData.get("description"),
+      title: formTitle,
+      description: formDescription,
     });
 
     if (!validateFields.success) {
@@ -51,9 +58,11 @@ export async function createPost(state: PostFormState, formData: FormData) {
 export async function updatePost(postId: number, formData: FormData) {
   try {
     const user = await getCurrentUser();
+    const formTitle = String(formData.get("title"));
+    const formDescription = String(formData.get("description"));
     const validateFields = PostSchema.safeParse({
-      title: formData.get("title"),
-      description: formData.get("description"),
+      title: formTitle,
+      description: formDescription,
     });
 
     if (!validateFields.success) {
@@ -193,6 +202,15 @@ export async function getPostbyId(postId: number) {
 
 export async function likePostbyId(postId: number) {
   try {
+    const user = await getCurrentUser();
+    if (user === null || user === undefined) {
+      throw new Error("User ID is required");
+    }
+
+    const likedPost = await db
+      .insert(likesTable)
+      .values({ userId: user.id, postId: postId });
+
     const updatedPost = await db
       .update(postTable)
       .set({
@@ -200,8 +218,22 @@ export async function likePostbyId(postId: number) {
       })
       .where(eq(postTable.id, postId))
       .returning();
+    if (updatedPost[0].author == null) {
+      throw new Error("Cant fetch the user Details");
+    }
+    const author = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, updatedPost[0].author));
+    const authorData = author[0];
 
-    return { success: true, data: updatedPost[0] };
+    return {
+      success: true,
+      data: {
+        ...updatedPost[0],
+        authorName: authorData?.name || "Unknown Author",
+      },
+    };
   } catch (error) {
     console.error("Failed to like post:", error);
     return { success: false };
@@ -210,6 +242,15 @@ export async function likePostbyId(postId: number) {
 
 export async function unlikePostbyId(postId: number) {
   try {
+    const user = await getCurrentUser();
+    if (user === null || user === undefined) {
+      throw new Error("User ID is required");
+    }
+    const likedPost = await db
+      .delete(likesTable)
+      .where(
+        and(eq(likesTable.postId, postId), eq(likesTable.userId, user?.id))
+      );
     const updatedPost = await db
       .update(postTable)
       .set({
@@ -218,7 +259,22 @@ export async function unlikePostbyId(postId: number) {
       .where(eq(postTable.id, postId))
       .returning();
 
-    return { success: true, data: updatedPost[0] };
+    if (updatedPost[0].author == null) {
+      throw new Error("Cant fetch the user Details");
+    }
+    const author = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, updatedPost[0].author));
+    const authorData = author[0];
+
+    return {
+      success: true,
+      data: {
+        ...updatedPost[0],
+        authorName: authorData?.name || "Unknown Author",
+      },
+    };
   } catch (error) {
     console.error("Failed to Unlike post:", error);
     return { success: false };
@@ -320,5 +376,23 @@ export async function getUserPostsPaginated(pageNumber: number) {
   } catch (error) {
     console.error("Failed to Get User Posts Paginated: ", error);
     return { success: false };
+  }
+}
+
+export async function isUserLikedPost(postId: number) {
+  try {
+    const user = await getCurrentUser();
+    if (user === null || user === undefined) {
+      throw new Error("User ID is required");
+    }
+    const likedPost = await db
+      .select()
+      .from(likesTable)
+      .where(
+        and(eq(likesTable.postId, postId), eq(likesTable.userId, user?.id))
+      );
+    return likedPost.length != 0;
+  } catch (err) {
+    console.log("Error while checking post isLisked: ", err);
   }
 }

@@ -1,6 +1,11 @@
 "use client";
 import { addComment, getCommentsbyPostId } from "@/actions/comment";
-import { getPostbyId, likePostbyId, unlikePostbyId } from "@/actions/post";
+import {
+  getPostbyId,
+  isUserLikedPost,
+  likePostbyId,
+  unlikePostbyId,
+} from "@/actions/post";
 import CommentBox from "@/app/_components/CommentBox";
 import { PostShimmer } from "@/app/_components/PostShimmer";
 import { Button } from "@/components/ui/button";
@@ -76,15 +81,17 @@ export default function Page() {
     const fetchAllData = async () => {
       setLoading(true);
       try {
-        const [postRes, commentsRes] = await Promise.all([
+        const [postRes, commentsRes, likeRes] = await Promise.all([
           getPostbyId(Number(id)),
           getCommentsbyPostId(Number(id)),
+          isUserLikedPost(Number(id)),
         ]);
         setPost(postRes?.data);
 
         if (Array.isArray(commentsRes)) {
           setComments(commentsRes);
         }
+        setIsLiked(Boolean(likeRes));
       } catch (err) {
         console.error(err);
       } finally {

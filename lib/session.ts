@@ -23,6 +23,9 @@ export async function signToken(
 
 export async function decrypt(token: string | undefined = "") {
   try {
+    if (encodedKey === undefined) {
+      throw new Error("Token Encoded Key can't be undefined");
+    }
     const { payload } = await jwtVerify(token, encodedKey, {
       algorithms: ["HS256"],
     });
@@ -37,6 +40,9 @@ export async function createSession(
   userRole: "admin" | "user"
 ) {
   try {
+    if (encodedKey === undefined) {
+      throw new Error("Token Encoded Key can't be undefined");
+    }
     const accessToken = await signToken(
       { userId, userRole },
       encodedKey,
