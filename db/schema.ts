@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  index,
   integer,
   pgEnum,
   pgTable,
@@ -24,16 +25,25 @@ export const usersTable = pgTable("users", {
   role: userRoleEnum("role").notNull().default("user"),
 });
 
-export const postTable = pgTable("posts", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  title: varchar().notNull(),
-  description: varchar().notNull(),
-  author: integer().references(() => usersTable.id),
-  upvotes: integer().default(0),
-  status: postStatusEnum("status").notNull().default("submitted"),
-  updated_at: timestamp("updated_at", { mode: "string" }).default(sql`now()`),
-  published_at: timestamp("published_at", { mode: "string" }),
-});
+export const postTable = pgTable(
+  "posts",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    title: varchar().notNull(),
+    description: varchar().notNull(),
+    author: integer().references(() => usersTable.id),
+    upvotes: integer().default(0),
+    status: postStatusEnum("status").notNull().default("submitted"),
+    updated_at: timestamp("updated_at", { mode: "string" }).default(sql`now()`),
+    published_at: timestamp("published_at", { mode: "string" }),
+  },
+  (table) => {
+    return {
+      statusIndex: index("idx_posts_status").on(table.status),
+      authorIndex: index("idx_posts_author").on(table.author),
+    };
+  }
+);
 
 export const commentsTable = pgTable("comments", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
